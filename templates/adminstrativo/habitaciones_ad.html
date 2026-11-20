@@ -1,0 +1,220 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Habitaciones - SysHSENA</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body class="bg-light">
+    <div class="d-flex">
+    
+       <div class="sidebar-caribe d-flex flex-column flex-shrink-0 p-3 text-white position-fixed shadow" >
+    <a href="{% url 'dashboard' %}" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none px-2">
+        <span class="fs-4 fw-bold">Hotel Real Caribe</span>
+    </a>
+    <div class="px-2 mb-3">
+        <span class="badge bg-warning text-dark rounded-pill px-3 py-1 fw-semibold" style="font-size: 0.75rem;">Panel General (Admin & Recepción)</span>
+    </div>
+    <hr class="text-secondary">
+    <ul class="nav nav-pills flex-column mb-auto gap-1" style="overflow-y: auto; max-height: calc(100vh - 250px);">
+        <li><a href="{% url 'dashboard' %}" class="nav-link"><i class="fa-solid fa-gauge me-2"></i> Dashboard Admin</a></li>
+        <li><a href="{% url 'habitaciones_ad' %}" class="nav-link active"><i class="fa-solid fa-bed me-2"></i> Habitaciones</a></li>
+        <li><a href="{% url 'servicios_ad' %}" class="nav-link"><i class="fa-solid fa-concierge-bell me-2"></i> Servicios Admin</a></li>
+        <li><a href="{% url 'reservas_ad' %}" class="nav-link"><i class="fa-solid fa-calendar-check me-2"></i> Reservas Admin</a></li>
+        <li><a href="{% url 'pagos_ad' %}" class="nav-link"><i class="fa-solid fa-credit-card me-2"></i> Pagos y Abonos</a></li>
+        <li><a href="{% url 'lista_usuarios' %}" class="nav-link"><i class="fa-solid fa-users me-2"></i> Huéspedes / Users</a></li>
+        <li><a href="{% url 'galeria_ad' %}" class="nav-link"><i class="fa-solid fa-images me-2"></i> Galería Admin</a></li> 
+        <li><a href="{% url 'reportes_ad' %}" class="nav-link"><i class="fa-solid fa-chart-line me-2"></i> Reportes y Estadísticas</a></li>
+        <li><a href="{% url 'configuracion_ad' %}" class="nav-link"><i class="fa-solid fa-gear me-2"></i> Configuración</a></li>
+        
+        <li><hr class="text-secondary my-2"></li>
+        <li><span class="text-uppercase text-warning fw-bold px-3" style="font-size: 0.7rem;">Módulos de Mostrador</span></li>
+        
+        <li><a href="{% url 'recepcion_registrar_huesped' %}" class="nav-link"><i class="fa-solid fa-user-plus me-2"></i> Registrar Huéspedes</a></li>
+        <li><a href="{% url 'recepcion_reservas' %}" class="nav-link"><i class="fa-solid fa-calendar-days me-2"></i> Crear & Ver Reservas</a></li>
+        <li><a href="{% url 'recepcion_disponibilidad' %}" class="nav-link"><i class="fa-solid fa-bed me-2"></i> Consultar Disponibilidad</a></li>
+        <li><a href="{% url 'recepcion_checkin_checkout' %}" class="nav-link"><i class="fa-solid fa-right-to-bracket me-2"></i> Check-in / Check-out</a></li>
+        <li><a href="{% url 'recepcion_pagos' %}" class="nav-link"><i class="fa-solid fa-cash-register me-2"></i> Registrar Pagos Mostrador</a></li>
+        
+    </ul>
+    <hr class="text-secondary">
+    <ul class="nav nav-pills flex-column gap-1">
+        <li><a href="{% url 'home' %}" class="nav-link text-warning fw-semibold"><i class="fa-solid fa-house me-2"></i> Ver Sitio Web</a></li>
+        <li>
+            <form action="{% url 'logout' %}" method="POST" class="m-0">
+                {% csrf_token %}
+                <button type="submit" class="nav-link text-danger fw-semibold border-0 bg-transparent w-100 text-start"><i class="fa-solid fa-right-from-bracket me-2"></i> Cerrar Sesión</button>
+            </form>
+        </li>
+    </ul>
+</div>
+        
+        <div class="flex-grow-1 p-4" style="margin-left: 280px; min-height: 100vh; display: flex; flex-direction: column;">
+            <div class="container-fluid flex-grow-1">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2 class="fw-bold text-dark mb-1"><i class="fa-solid fa-bed text-primary me-2"></i>Gestión de Habitaciones</h2>
+                        <p class="text-muted mb-0">Administración de precios, descripciones personalizadas, modalidades de tarifa y estados operativos.</p>
+                    </div>
+                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalCrearHabitacion">
+                        <i class="fa-solid fa-plus me-1"></i> Nueva Habitación
+                    </button>
+                </div>
+
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                
+                <div class="card shadow-sm border-0 rounded-4 p-4 bg-white">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Imagen</th>
+                                    <th>N°</th>
+                                    <th>Tipo</th>
+                                    <th>Modalidad</th>
+                                    <th>Precio</th>
+                                    <th>Estado</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for hab in habitaciones %}
+                                <tr>
+                                    <td>
+                                        {% if hab.imagen %}
+                                            <img src="{{ hab.imagen.url }}" alt="Habitación" class="rounded-3" style="width: 50px; height: 50px; object-fit: cover;">
+                                        {% else %}
+                                            <span class="text-muted small">Sin imagen</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="fw-bold">#{{ hab.numero }}</td>
+                                    <td>{{ hab.tipo_habitacion.nombre }}</td>
+                                    <td>
+                                        <span class="badge bg-info text-dark">
+                                            {% if hab.modalidad == 'DIA' %}Por Día
+                                            {% elif hab.modalidad == 'NOCHE' %}Por Noche
+                                            {% else %}Por Varios Días{% endif %}
+                                        </span>
+                                    </td>
+                                    <td class="fw-bold text-success">${{ hab.precio }} COP</td>
+                                    <td>
+                                        {% if hab.estado == 'DISPONIBLE' %}
+                                            <span class="badge bg-success">Disponible</span>
+                                        {% elif hab.estado == 'OCUPADA' %}
+                                            <span class="badge bg-danger">Ocupada</span>
+                                        {% else %}
+                                            <span class="badge bg-warning text-dark">En Mantenimiento</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        <a href="{% url 'editar_habitacion' hab.id %}" class="btn btn-sm btn-outline-primary" title="Editar">
+                                            <i class="fa-solid fa-pen"></i>
+                                        </a>
+                                        <a href="{% url 'eliminar_habitacion' hab.id %}" class="btn btn-sm btn-outline-danger" title="Eliminar" onclick="return confirm('¿Estás seguro de eliminar esta habitación?');">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted py-4">No hay habitaciones registradas en el sistema.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+        
+            <div class="modal fade" id="modalCrearHabitacion" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content rounded-4">
+                        <form action="{% url 'crear_habitacion' %}" method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="modal-header">
+                                <h5 class="modal-title fw-bold">Registrar Nueva Habitación</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold small">Número de Habitación</label>
+                                    <input type="text" class="form-control" name="numero" placeholder="Ej. 101" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold small">Tipo de Habitación</label>
+                                    <select class="form-select" name="tipo_habitacion" required>
+                                        {% for tipo in tipos_habitacion %}
+                                            <option value="{{ tipo.id }}">{{ tipo.nombre }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-semibold small">Piso</label>
+                                        <input type="number" class="form-control" name="piso" placeholder="1" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-semibold small">Capacidad (Personas)</label>
+                                        <input type="number" class="form-control" name="capacidad" placeholder="2" required>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-semibold small">Precio (COP)</label>
+                                        <input type="number" class="form-control" name="precio" placeholder="80000" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-semibold small">Modalidad de Tarifa</label>
+                                        <select class="form-select" name="modalidad" required>
+                                            <option value="NOCHE">Por Noche</option>
+                                            <option value="DIA">Por Día</option>
+                                            <option value="DIAS">Por Varios Días</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold small">Descripción Personalizada</label>
+                                    <textarea class="form-control" name="descripcion" rows="3" placeholder="Ej. Habitación ejecutiva con vista al mar, aire acondicionado inverter y amenidades exclusivas..."></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold small">Estado Operativo</label>
+                                    <select class="form-select" name="estado">
+                                        <option value="DISPONIBLE">Disponible</option>
+                                        <option value="OCUPADA">Ocupada</option>
+                                        <option value="MANTENIMIENTO">En Mantenimiento / Reparación</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold small">Fotografía</label>
+                                    <input type="file" class="form-control" name="imagen">
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="submit" class="btn btn-primary btn-sm">Guardar Habitación</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="text-center py-3 text-muted small mt-auto border-top">
+                <p class="mb-0">SysHSENA 2026 - Hotel Real Caribe | Riohacha, La Guajira</p>
+            </footer>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

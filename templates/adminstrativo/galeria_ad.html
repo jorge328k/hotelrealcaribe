@@ -1,0 +1,153 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administrar Galería - SysHSENA</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    
+</head>
+<body class="bg-light">
+    <div class="d-flex">
+        
+        
+        <div class="sidebar-caribe d-flex flex-column flex-shrink-0 p-3 text-white position-fixed shadow" >
+    <a href="{% url 'dashboard' %}" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none px-2">
+        <span class="fs-4 fw-bold">Hotel Real Caribe</span>
+    </a>
+    <div class="px-2 mb-3">
+        <span class="badge bg-warning text-dark rounded-pill px-3 py-1 fw-semibold" style="font-size: 0.75rem;">Panel General (Admin & Recepción)</span>
+    </div>
+    <hr class="text-secondary">
+    <ul class="nav nav-pills flex-column mb-auto gap-1" style="overflow-y: auto; max-height: calc(100vh - 250px);">
+        <li><a href="{% url 'dashboard' %}" class="nav-link"><i class="fa-solid fa-gauge me-2"></i> Dashboard Admin</a></li>
+        <li><a href="{% url 'habitaciones_ad' %}" class="nav-link"><i class="fa-solid fa-bed me-2"></i> Habitaciones</a></li>
+        <li><a href="{% url 'servicios_ad' %}" class="nav-link"><i class="fa-solid fa-concierge-bell me-2"></i> Servicios Admin</a></li>
+        <li><a href="{% url 'reservas_ad' %}" class="nav-link"><i class="fa-solid fa-calendar-check me-2"></i> Reservas Admin</a></li>
+        <li><a href="{% url 'pagos_ad' %}" class="nav-link"><i class="fa-solid fa-credit-card me-2"></i> Pagos y Abonos</a></li>
+        <li><a href="{% url 'lista_usuarios' %}" class="nav-link"><i class="fa-solid fa-users me-2"></i> Huéspedes / Users</a></li>
+        <li><a href="{% url 'galeria_ad' %}" class="nav-link active"><i class="fa-solid fa-images me-2"></i> Galería Admin</a></li> 
+        <li><a href="{% url 'reportes_ad' %}" class="nav-link"><i class="fa-solid fa-chart-line me-2"></i> Reportes y Estadísticas</a></li>
+        <li><a href="{% url 'configuracion_ad' %}" class="nav-link"><i class="fa-solid fa-gear me-2"></i> Configuración</a></li>
+        
+        <li><hr class="text-secondary my-2"></li>
+        <li><span class="text-uppercase text-warning fw-bold px-3" style="font-size: 0.7rem;">Módulos de Mostrador</span></li>
+        
+        <li><a href="{% url 'recepcion_registrar_huesped' %}" class="nav-link"><i class="fa-solid fa-user-plus me-2"></i> Registrar Huéspedes</a></li>
+        <li><a href="{% url 'recepcion_reservas' %}" class="nav-link"><i class="fa-solid fa-calendar-days me-2"></i> Crear & Ver Reservas</a></li>
+        <li><a href="{% url 'recepcion_disponibilidad' %}" class="nav-link"><i class="fa-solid fa-bed me-2"></i> Consultar Disponibilidad</a></li>
+        <li><a href="{% url 'recepcion_checkin_checkout' %}" class="nav-link"><i class="fa-solid fa-right-to-bracket me-2"></i> Check-in / Check-out</a></li>
+        <li><a href="{% url 'recepcion_pagos' %}" class="nav-link"><i class="fa-solid fa-cash-register me-2"></i> Registrar Pagos Mostrador</a></li>
+        
+    </ul>
+    <hr class="text-secondary">
+    <ul class="nav nav-pills flex-column gap-1">
+        <li><a href="{% url 'home' %}" class="nav-link text-warning fw-semibold"><i class="fa-solid fa-house me-2"></i> Ver Sitio Web</a></li>
+        <li>
+            <form action="{% url 'logout' %}" method="POST" class="m-0">
+                {% csrf_token %}
+                <button type="submit" class="nav-link text-danger fw-semibold border-0 bg-transparent w-100 text-start"><i class="fa-solid fa-right-from-bracket me-2"></i> Cerrar Sesión</button>
+            </form>
+        </li>
+    </ul>
+</div>
+       
+        <div class="flex-grow-1 p-4" style="margin-left: 280px; min-height: 100vh; display: flex; flex-direction: column;">
+            <div class="container-fluid flex-grow-1">
+                <div class="row mb-4 align-items-center">
+                    <div class="col">
+                        <h2 class="fw-bold text-dark"><i class="fa-solid fa-photo-film text-primary me-2"></i>Gestión de Galería</h2>
+                        <p class="text-muted mb-0">Sube nuevas fotografías corporativas o administra el contenido visual del Hotel Real Caribe.</p>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-lg-4">
+                        <div class="card shadow-sm border-0 rounded-4 p-4 bg-white">
+                            <div class="d-flex align-items-center gap-2 mb-3">
+                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">
+                                    <i class="fa-solid fa-upload fa-sm"></i>
+                                </div>
+                                <h4 class="fw-bold mb-0 text-dark fs-5">Subir Nueva Foto</h4>
+                            </div>
+                            <form method="POST" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label for="titulo" class="form-label fw-semibold text-secondary small">Título de la imagen</label>
+                                    <input type="text" class="form-control rounded-3 shadow-none" id="titulo" name="titulo" placeholder="Ej. Piscina Principal">
+                                </div>
+                                <div class="mb-4">
+                                    <label for="imagen" class="form-label fw-semibold text-secondary small">Seleccionar Archivo</label>
+                                    <input type="file" class="form-control rounded-3 shadow-none" id="imagen" name="imagen" accept="image/*" required>
+                                </div>
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary fw-bold rounded-3 py-2 shadow-sm">
+                                        <i class="fa-solid fa-cloud-arrow-up me-2"></i>Subir Imagen
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-8">
+                        <div class="card shadow-sm border-0 rounded-4 p-4 bg-white">
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <h4 class="fw-bold mb-0 text-dark fs-5">
+                                    <i class="fa-solid fa-images text-secondary me-2"></i>Fotografías Registradas
+                                </h4>
+                                <span class="badge bg-secondary rounded-pill">Total: {{ fotos|length }}</span>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table align-middle table-hover">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th class="py-3 rounded-start">Vista Previa</th>
+                                            <th class="py-3">Título</th>
+                                            <th class="py-3 text-center rounded-end">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in fotos %}
+                                        <tr>
+                                            <td>
+                                                <div class="overflow-hidden rounded-3 shadow-sm" style="width: 80px; height: 55px;">
+                                                    <img src="{{ item.imagen.url }}" alt="{{ item.titulo }}" class="w-100 h-100 object-fit-cover">
+                                                </div>
+                                            </td>
+                                            <td class="fw-semibold text-dark">{{ item.titulo|default:"Sin título" }}</td>
+                                            <td class="text-center">
+                                                <form action="{% url 'eliminar_galeria' item.id %}" method="POST" class="d-inline" onsubmit="return confirm('¿Estás seguro de eliminar esta foto?');">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-outline-danger btn-sm fw-bold rounded-3 px-3">
+                                                        <i class="fa-solid fa-trash-can me-1"></i> Quitar
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="3" class="text-center py-5 text-muted">
+                                                <i class="fa-regular fa-folder-open fa-2x mb-2 d-block text-secondary"></i>
+                                                No hay imágenes cargadas en el sistema todavía.
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="text-center py-3 text-muted small mt-auto border-top">
+                <p class="mb-0">SysHSENA 2026 - Hotel Real Caribe | Riohacha, La Guajira</p>
+            </footer>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,238 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - SysHSENA</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-light">
+    <div class="d-flex">
+
+        <div class="sidebar-caribe d-flex flex-column flex-shrink-0 p-3 text-white position-fixed shadow">
+            <a href="{% url 'dashboard' %}" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none px-2">
+                <span class="fs-4 fw-bold">Hotel Real Caribe</span>
+            </a>
+            <div class="px-2 mb-3">
+                <span class="badge bg-warning text-dark rounded-pill px-3 py-1 fw-semibold" style="font-size: 0.75rem;">Panel General (Admin & Recepción)</span>
+            </div>
+            <hr class="text-secondary">
+            <ul class="nav nav-pills flex-column mb-auto gap-1" style="overflow-y: auto; max-height: calc(100vh - 250px);">
+                <li><a href="{% url 'dashboard' %}" class="nav-link active"><i class="fa-solid fa-gauge me-2"></i> Dashboard Admin</a></li>
+                <li><a href="{% url 'habitaciones_ad' %}" class="nav-link"><i class="fa-solid fa-bed me-2"></i> Habitaciones</a></li>
+                <li><a href="{% url 'servicios_ad' %}" class="nav-link"><i class="fa-solid fa-concierge-bell me-2"></i> Servicios Admin</a></li>
+                <li><a href="{% url 'reservas_ad' %}" class="nav-link"><i class="fa-solid fa-calendar-check me-2"></i> Reservas Admin</a></li>
+                <li><a href="{% url 'pagos_ad' %}" class="nav-link"><i class="fa-solid fa-credit-card me-2"></i> Pagos y Abonos</a></li>
+                <li><a href="{% url 'lista_usuarios' %}" class="nav-link"><i class="fa-solid fa-users me-2"></i> Huéspedes / Users</a></li>
+                <li><a href="{% url 'galeria_ad' %}" class="nav-link"><i class="fa-solid fa-images me-2"></i> Galería Admin</a></li>
+                <li><a href="{% url 'reportes_ad' %}" class="nav-link"><i class="fa-solid fa-chart-line me-2"></i> Reportes y Estadísticas</a></li>
+                <li><a href="{% url 'configuracion_ad' %}" class="nav-link"><i class="fa-solid fa-gear me-2"></i> Configuración</a></li>
+
+                <li><hr class="text-secondary my-2"></li>
+                <li><span class="text-uppercase text-warning fw-bold px-3" style="font-size: 0.7rem;">Módulos de Mostrador</span></li>
+
+                <li><a href="{% url 'recepcion_registrar_huesped' %}" class="nav-link"><i class="fa-solid fa-user-plus me-2"></i> Registrar Huéspedes</a></li>
+                <li><a href="{% url 'recepcion_reservas' %}" class="nav-link"><i class="fa-solid fa-calendar-days me-2"></i> Crear & Ver Reservas</a></li>
+                <li><a href="{% url 'recepcion_disponibilidad' %}" class="nav-link"><i class="fa-solid fa-bed me-2"></i> Consultar Disponibilidad</a></li>
+                <li><a href="{% url 'recepcion_checkin_checkout' %}" class="nav-link"><i class="fa-solid fa-right-to-bracket me-2"></i> Check-in / Check-out</a></li>
+                <li><a href="{% url 'recepcion_pagos' %}" class="nav-link"><i class="fa-solid fa-cash-register me-2"></i> Registrar Pagos Mostrador</a></li>
+            </ul>
+            <hr class="text-secondary">
+            <ul class="nav nav-pills flex-column gap-1">
+                <li><a href="{% url 'home' %}" class="nav-link text-warning fw-semibold"><i class="fa-solid fa-house me-2"></i> Ver Sitio Web</a></li>
+                <li>
+                    <form action="{% url 'logout' %}" method="POST" class="m-0">
+                        {% csrf_token %}
+                        <button type="submit" class="nav-link text-danger fw-semibold border-0 bg-transparent w-100 text-start"><i class="fa-solid fa-right-from-bracket me-2"></i> Cerrar Sesión</button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+
+        <div class="flex-grow-1 p-4" style="margin-left: 280px; min-height: 100vh; display: flex; flex-direction: column;">
+            <div class="container-fluid flex-grow-1">
+                <h2 class="fw-bold text-dark mb-4"><i class="fa-solid fa-gauge-high text-primary me-2"></i>Dashboard General</h2>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-3">
+                        <div class="card shadow-sm border-0 rounded-4 p-3 bg-white border-start border-dark border-4">
+                            <span class="text-muted small fw-semibold">Habitaciones Totales</span>
+                            <h4 class="fw-bold mb-0 text-dark">{{ total_habitaciones }}</h4>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card shadow-sm border-0 rounded-4 p-3 bg-white border-start border-success border-4">
+                            <span class="text-muted small fw-semibold">Habitaciones Disponibles</span>
+                            <h4 class="fw-bold mb-0 text-success">{{ habitaciones_disponibles }}</h4>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card shadow-sm border-0 rounded-4 p-3 bg-white border-start border-danger border-4">
+                            <span class="text-muted small fw-semibold">Habitaciones Ocupadas</span>
+                            <h4 class="fw-bold mb-0 text-danger">{{ habitaciones_ocupadas }}</h4>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card shadow-sm border-0 rounded-4 p-3 bg-white border-start border-primary border-4">
+                            <span class="text-muted small fw-semibold">Porcentaje de Ocupación</span>
+                            <h4 class="fw-bold mb-0 text-primary">{{ porcentaje_ocupacion }}%</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-3">
+                        <div class="card shadow-sm border-0 rounded-4 p-3 bg-white border-start border-info border-4">
+                            <span class="text-muted small fw-semibold">Reservas Activas</span>
+                            <h4 class="fw-bold mb-0 text-dark">{{ reservas_activas }}</h4>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card shadow-sm border-0 rounded-4 p-3 bg-white border-start border-warning border-4">
+                            <span class="text-muted small fw-semibold">Reservas del Día</span>
+                            <h4 class="fw-bold mb-0 text-dark">{{ reservas_del_dia }}</h4>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card shadow-sm border-0 rounded-4 p-3 bg-white border-start border-secondary border-4">
+                            <span class="text-muted small fw-semibold">Huéspedes Registrados</span>
+                            <h4 class="fw-bold mb-0 text-dark">{{ total_huespedes }}</h4>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card shadow-sm border-0 rounded-4 p-3 bg-white border-start border-success border-4">
+                            <span class="text-muted small fw-semibold">Ingresos</span>
+                            <h4 class="fw-bold mb-0 text-success">${{ ingresos_totales|floatformat:0 }} COP</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-lg-6">
+                        <div class="card shadow-sm border-0 rounded-4 p-4 bg-white h-100">
+                            <h5 class="fw-bold text-dark mb-3"><i class="fa-solid fa-chart-line text-warning me-2"></i>Habitualidad de Reservas por Meses</h5>
+                            <div style="position: relative; height: 260px; width: 100%;">
+                                <canvas id="graficaLineasMeses"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="card shadow-sm border-0 rounded-4 p-4 bg-white h-100">
+                            <h5 class="fw-bold text-dark mb-3"><i class="fa-solid fa-users text-primary me-2"></i>Clientes vs Huéspedes</h5>
+                            <div style="position: relative; height: 260px; width: 100%;">
+                                <canvas id="graficaClientesVsHuespedes"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="card shadow-sm border-0 rounded-4 p-4 bg-white h-100">
+                            <h5 class="fw-bold text-dark mb-3"><i class="fa-solid fa-bed text-success me-2"></i>Estado de Habitaciones (Disponibles / No Disponibles)</h5>
+                            <div style="position: relative; height: 260px; width: 100%;">
+                                <canvas id="graficaHabitacionesDona"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="card shadow-sm border-0 rounded-4 p-4 bg-white h-100">
+                            <h5 class="fw-bold text-dark mb-3"><i class="fa-solid fa-circle-nodes text-info me-2"></i>Resumen General de Operaciones (Radar)</h5>
+                            <div style="position: relative; height: 260px; width: 100%;">
+                                <canvas id="graficaRadarOp"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <footer class="text-center py-3 text-muted small mt-auto border-top">
+                <p class="mb-0">SysHSENA 2026 - Hotel Real Caribe | Riohacha, La Guajira</p>
+            </footer>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const datosMeses = JSON.parse('{{ meses_conteo_json|safe }}');
+            const totalClientes = parseInt("{{ usuarios_clientes }}") || 0;
+            const totalHuespedes = parseInt("{{ total_huespedes }}") || 0;
+            const habDisponibles = parseInt("{{ habitaciones_disponibles }}") || 0;
+            const habNoDisponibles = parseInt("{{ habitaciones_no_disponibles }}") || 0;
+
+            const ocupacion = parseFloat("{{ porcentaje_ocupacion }}") || 0;
+            const activas = parseFloat("{{ reservas_activas }}") || 0;
+            const reservasDia = parseFloat("{{ reservas_del_dia }}") || 0;
+            const huespedes = parseFloat("{{ total_huespedes }}") || 0;
+
+            const mesesEtiquetas = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+            new Chart(document.getElementById('graficaLineasMeses').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: mesesEtiquetas,
+                    datasets: [{
+                        label: 'Reservas Registradas',
+                        data: datosMeses,
+                        fill: true,
+                        backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                        borderColor: '#ffc107',
+                        borderWidth: 3,
+                        tension: 0.3,
+                        pointRadius: 5
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+            });
+
+            new Chart(document.getElementById('graficaClientesVsHuespedes').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['Clientes', 'Huéspedes'],
+                    datasets: [{
+                        label: 'Cantidad',
+                        data: [totalClientes, totalHuespedes],
+                        backgroundColor: ['rgba(13, 202, 240, 0.85)', 'rgba(32, 74, 122, 0.85)'],
+                        borderWidth: 1,
+                        borderRadius: 6
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+            });
+
+            new Chart(document.getElementById('graficaHabitacionesDona').getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Disponibles', 'No Disponibles (Ocupadas / Mantenimiento)'],
+                    datasets: [{
+                        data: [habDisponibles, habNoDisponibles],
+                        backgroundColor: ['#198754', '#dc3545'],
+                        borderWidth: 2
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10 } } } }
+            });
+
+            new Chart(document.getElementById('graficaRadarOp').getContext('2d'), {
+                type: 'radar',
+                data: {
+                    labels: ['Ocupación (%)', 'Reservas Activas', 'Reservas del Día', 'Huéspedes'],
+                    datasets: [{
+                        label: 'Métricas Generales',
+                        data: [ocupacion, activas, reservasDia, huespedes],
+                        backgroundColor: 'rgba(32, 74, 122, 0.2)',
+                        borderColor: '#204a7a',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#204a7a'
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        });
+    </script>
+</body>
+</html>

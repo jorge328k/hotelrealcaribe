@@ -1,0 +1,294 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SysHSENA - Hotel Real Caribe | {{ nombre_hotel|default:"Hotel Real Caribe" }}</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body class="d-flex flex-column min-vh-100">
+
+<nav class="navbar navbar-expand-lg navbar-dark navbar-caribe py-2 shadow-sm sticky-top" style="background-color: #0a2540 !important;">
+    <div class="container">
+        <a class="navbar-brand fw-bold d-flex align-items-center gap-3" href="{% url 'home' %}">
+            <img src="{% static 'img/logo2.png' %}" alt="Logo Hotel Real Caribe" class="brand-logo-img">
+            <span style="color: #c5a059 !important; font-size: 1.4rem;">{{ nombre_hotel|default:"Hotel Real Caribe" }}</span>
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
+            <ul class="navbar-nav align-items-lg-center mx-auto gap-lg-2">
+                <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">HOME</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'home' %}#nosotros">NOSOTROS</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'habitaciones' %}">HABITACIONES</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'galeria' %}">GALERÍA</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'contactanos' %}">CONTÁCTENOS</a></li>
+            </ul>
+
+            <ul class="navbar-nav align-items-center gap-2">
+                <li class="nav-item">
+                    <button id="darkModeToggle" class="btn btn-outline-light btn-sm rounded-circle p-2" title="Cambiar Modo Claro/Oscuro" style="width: 38px; height: 38px;">
+                        <i class="fa-solid fa-moon" id="themeIcon"></i>
+                    </button>
+                </li>
+
+                {% if user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center gap-2 text-white py-1 px-2 rounded-pill" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="background-color: rgba(255, 255, 255, 0.1);">
+                            <img src="https://ui-avatars.com/api/?name={{ user.username }}&background=204a7a&color=fff" alt="Perfil" class="rounded-circle border border-white shadow-sm" style="width: 32px; height: 32px; object-fit: cover;">
+                            <span class="fw-semibold text-info">{{ user.username }}</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 mt-2">
+                            {% if user.is_staff or user.is_superuser %}
+                                <li><a class="dropdown-item py-2" href="{% url 'dashboard' %}"><i class="fa-solid fa-gauge me-2 text-primary"></i> Panel Administrativo</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                            {% endif %}
+                            <li>
+                                <form action="{% url 'logout' %}" method="POST" class="px-3 py-1 m-0">
+                                    {% csrf_token %}
+                                    <button type="submit" class="dropdown-item text-danger p-0 fw-semibold bg-transparent border-0 w-100 text-start">
+                                        <i class="fa-solid fa-right-from-bracket me-2"></i> Cerrar Sesión
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a href="{% url 'login' %}" class="btn btn-outline-light btn-sm px-4 py-2 fw-semibold rounded-pill">
+                            <i class="fa-solid fa-user me-1"></i> Iniciar Sesión
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
+    
+    <div class="hero-banner-caribe text-center text-white mb-0 w-100 py-5">
+        <h1 class="display-4 fw-bold mb-2" style="color: #c5a059 !important;">𝓑𝓲𝓮𝓷𝓿𝓮𝓷𝓲𝓭𝓸𝓼 𝓪𝓵 𝓗𝓸𝓽𝓮𝓵 𝓡𝓮𝓪𝓵 𝓒𝓪𝓻𝓲𝓫𝓮</h1>
+        <p class="lead mb-0 fs-4 text-white">Sistema de Gestión Hotelera en {{ ubicacion|default:"Riohacha, La Guajira" }}</p>
+        <span class="badge bg-info text-dark mt-3 px-3 py-2 fs-6">
+            <i class="fa-solid fa-location-dot me-1"></i> Calle 12 # 7-45, Barrio Centro
+        </span>
+    </div>
+
+    <div class="container my-4 flex-grow-1">
+        <div class="booking-card p-4 mx-auto col-lg-11 mb-5 mt-n4 position-relative bg-white shadow-sm rounded-4" style="z-index: 10;" id="disponibilidad">
+            <h5 class="fw-bold text-dark mb-3"><i class="fa-solid fa-magnifying-glass text-info me-2"></i>Buscador de Disponibilidad Anti-Overbooking</h5>
+            <form action="{% url 'habitaciones' %}" method="GET" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold text-muted small mb-1">FECHA ENTRADA (CHECK-IN)</label>
+                    <input type="date" class="form-control" name="checkin" id="checkin_date" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold text-muted small mb-1">FECHA SALIDA (CHECK-OUT)</label>
+                    <input type="date" class="form-control" name="checkout" id="checkout_date" required>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-semibold text-muted small mb-1">MODALIDAD</label>
+                    <select class="form-select" name="modalidad">
+                        <option value="dias" selected>Noche</option>
+                        <option value="horas">Dia</option>
+                        <option value="mensual">Varios Dias</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-semibold text-muted small mb-1">HUÉSPEDES</label>
+                    <select class="form-select" name="huespedes">
+                        <option value="1">1 Persona</option>
+                        <option value="2" selected>2 Personas</option>
+                        <option value="3">3 Personas</option>
+                        <option value="4">4+ Personas</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100 py-2"><i class="fa-solid fa-calendar-check me-1"></i> Consultar</button>
+                </div>
+            </form>
+        </div>
+        
+        <div class="bg-white p-4 p-md-5 rounded-4 shadow-sm mb-5" id="nosotros">
+            <div class="row align-items-center g-4">
+                <div class="col-lg-6">
+                    <span class="text-uppercase text-info fw-bold small">Conoce Instalaciones</span>
+                    <h2 class="fw-bold text-dark mb-3">Quiénes Somos y Sobre Nosotros</h2>
+                    <p>
+                        Ubicado estratégicamente en el corazón de <strong>Riohacha, La Guajira</strong>, el <strong>Hotel Real Caribe</strong> combina la calidez de la tradición caribeña con un servicio moderno y eficiente adaptado a las necesidades de viajeros de placer y de negocios.
+                    </p>
+                    <p>
+                        Nacimos con el propósito de ser un punto de encuentro confiable y acogedor para quienes visitan la capital guajira por trabajo, descanso o aventura. Cuidamos cada detalle de nuestras habitaciones, servicios y procesos de atención para que disfrutes de descanso real, puntualidad y la auténtica hospitalidad de nuestra tierra.
+                    </p>
+                    <div class="row g-3 text-center mb-4">
+                        <div class="col-sm-4">
+                            <div class="p-3 bg-light rounded-3 border">
+                                <i class="fa-solid fa-wifi text-primary fs-3 mb-2"></i>
+                                <h6 class="fw-bold mb-0">Wi-Fi Rápido</h6>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="p-3 bg-light rounded-3 border">
+                                <i class="fa-solid fa-snowflake text-info fs-3 mb-2"></i>
+                                <h6 class="fw-bold mb-0">Climatización</h6>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="p-3 bg-light rounded-3 border">
+                                <i class="fa-solid fa-square-parking text-success fs-3 mb-2"></i>
+                                <h6 class="fw-bold mb-0">Parqueadero</h6>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <img src="{% static 'img/playas.jpg' %}" alt="Vista de Riohacha La Guajira" class="img-fluid rounded-4 shadow-sm w-100" style="height: 210px; object-fit: cover; cursor: pointer;" data-bs-toggle="modal" data-bs-target="#imageModal" data-img-url="{% static 'img/playas.jpg' %}" data-img-title="Playas de Riohacha, La Guajira">
+                        </div>
+                        <div class="col-6">
+                            <img src="{% static 'img/hab_doble.jpg' %}" alt="Instalaciones del Hotel" class="img-fluid rounded-4 shadow-sm w-100" style="height: 150px; object-fit: cover; cursor: pointer;" data-bs-toggle="modal" data-bs-target="#imageModal" data-img-url="{% static 'img/hab_doble.jpg' %}" data-img-title="Habitación Doble - Hotel Real Caribe">
+                        </div>
+                        <div class="col-6">
+                            <img src="{% static 'img/hab_individual.jpg' %}" alt="Ambiente Hotelero" class="img-fluid rounded-4 shadow-sm w-100" style="height: 150px; object-fit: cover; cursor: pointer;" data-bs-toggle="modal" data-bs-target="#imageModal" data-img-url="{% static 'img/hab_individual.jpg' %}" data-img-title="Habitación Individual">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row g-4 mb-5" id="atracciones">
+            <div class="col-md-6">
+                <div class="bg-white p-4 rounded-4 shadow-sm border-start border-4 border-primary h-100">
+                    <h4 class="fw-bold text-dark mb-3"><i class="fa-solid fa-id-card text-primary me-2"></i>Control Documental Obligatorio</h4>
+                    <p class="text-muted small">Validación requerida de documentos de identidad físicos:</p>
+                    <ul class="list-group list-group-flush small">
+                        <li class="list-group-item"><i class="fa-solid fa-check text-success me-2"></i>Cédula de Ciudadanía (CC)</li>
+                        <li class="list-group-item"><i class="fa-solid fa-check text-success me-2"></i>Cédula de Extranjería (CE)</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-6" id="galeria">
+                <div class="bg-white p-4 rounded-4 shadow-sm border-start border-4 border-info h-100">
+                    <h4 class="fw-bold text-dark mb-3"><i class="fa-solid fa-bell-concierge text-info me-2"></i>Servicios Extra Vinculados</h4>
+                    <p class="text-muted small">Carga directa a la cuenta activa de la habitación:</p>
+                    <div class="row g-2 text-center small fw-semibold">
+                        <div class="col-6"><div class="p-2 bg-light rounded border"><i class="fa-solid fa-utensils text-warning me-1"></i> Desayuno Caribeño </div></div>
+                        <div class="col-6"><div class="p-2 bg-light rounded border"><i class="fa-solid fa-utensils text-danger me-1"></i> Almuerzo Ejecutivo </div></div>
+                        <div class="col-6"><div class="p-2 bg-light rounded border"><i class="fa-solid fa-shirt text-primary me-1"></i> Lavandería </div></div>
+                        <div class="col-6"><div class="p-2 bg-light rounded border"><i class="fa-solid fa-wine-bottle text-success me-1"></i> Minibar  </div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section id="como-llegar" class="py-5 bg-white">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold text-dark display-5">¿Cómo Llegar al Hotel Real Caribe?</h2>
+                <p class="text-muted fs-5">Nos encontramos ubicados en pleno corazón de Riohacha.</p>
+            </div>
+            <div class="row g-4 align-items-center">
+                <div class="col-lg-6">
+                    <div class="card border-0 shadow-sm rounded-4 p-4 bg-light">
+                        <h3 class="fw-bold text-primary mb-4"><i class="fa-solid fa-map-location-dot me-2"></i>Nuestra Ubicación</h3>
+                        <p class="text-muted mb-0">Calle 12 # 7-45, Barrio Centro, Riohacha, La Guajira, Colombia.</p>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="card border-0 shadow-sm rounded-4 overflow-hidden" style="min-height: 380px;">
+                        <iframe src="https://maps.google.com/maps?q=Calle%2012%20%23%207-45,%20Riohacha,%20La%20Guajira&t=&z=15&ie=UTF8&iwloc=&output=embed" width="100%" height="400" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content bg-dark border-0 rounded-4 overflow-hidden shadow-lg">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title text-white fw-bold" id="imageModalLabel">Detalle de Imagen</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center p-4">
+                    <img id="modalImage" src="" alt="Imagen Ampliada" class="img-fluid rounded-3 shadow" style="max-height: 75vh; object-fit: contain;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-white text-center py-3 mt-auto shadow-sm" id="contactenos" style="background-color: #0a2540;">
+        <div class="container">
+            <p class="mb-0 small">© 2026 - Hotel Real Caribe ({{ ubicacion|default:"Riohacha, La Guajira" }}) | Todos los derechos reservados</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const inputCheckin = document.getElementById('checkin_date');
+        const inputCheckout = document.getElementById('checkout_date');
+
+        const hoy = new Date().toISOString().split('T')[0];
+        if (inputCheckin) inputCheckin.setAttribute('min', hoy);
+
+        if (inputCheckin && inputCheckout) {
+            inputCheckin.addEventListener('change', function() {
+                let fechaMinimaSalida = inputCheckin.value;
+                inputCheckout.setAttribute('min', fechaMinimaSalida);
+                
+                if (inputCheckout.value && inputCheckout.value < fechaMinimaSalida) {
+                    inputCheckout.value = '';
+                }
+            });
+        }
+
+        const imageModal = document.getElementById('imageModal');
+        if (imageModal) {
+            imageModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const imgUrl = button.getAttribute('data-img-url');
+                const imgTitle = button.getAttribute('data-img-title');
+                
+                const modalImage = document.getElementById('modalImage');
+                const modalTitle = document.getElementById('imageModalLabel');
+                
+                modalImage.src = imgUrl;
+                modalTitle.textContent = imgTitle;
+            });
+        }
+        
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const body = document.body;
+
+        if (localStorage.getItem('theme') === 'dark') {
+            body.classList.add('dark-mode');
+            themeIcon.classList.replace('fa-moon', 'fa-sun');
+        }
+
+        darkModeToggle.addEventListener('click', function() {
+            body.classList.toggle('dark-mode');
+            
+            if (body.classList.contains('dark-mode')) {
+                localStorage.setItem('theme', 'dark');
+                themeIcon.classList.replace('fa-moon', 'fa-sun');
+            } else {
+                localStorage.setItem('theme', 'light');
+                themeIcon.classList.replace('fa-sun', 'fa-moon');
+            }
+        });
+    </script>
+</body>
+</html>

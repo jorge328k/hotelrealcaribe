@@ -1,0 +1,177 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Usuarios - SysHSENA</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body class="bg-light">
+    <div class="d-flex">
+        
+       <div class="sidebar-caribe d-flex flex-column flex-shrink-0 p-3 text-white position-fixed shadow" >
+    <a href="{% url 'dashboard' %}" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none px-2">
+        <span class="fs-4 fw-bold">Hotel Real Caribe</span>
+    </a>
+    <div class="px-2 mb-3">
+        <span class="badge bg-warning text-dark rounded-pill px-3 py-1 fw-semibold" style="font-size: 0.75rem;">Panel General (Admin & Recepción)</span>
+    </div>
+    <hr class="text-secondary">
+    <ul class="nav nav-pills flex-column mb-auto gap-1" style="overflow-y: auto; max-height: calc(100vh - 250px);">
+        <li><a href="{% url 'dashboard' %}" class="nav-link"><i class="fa-solid fa-gauge me-2"></i> Dashboard Admin</a></li>
+        <li><a href="{% url 'habitaciones_ad' %}" class="nav-link"><i class="fa-solid fa-bed me-2"></i> Habitaciones</a></li>
+        <li><a href="{% url 'servicios_ad' %}" class="nav-link"><i class="fa-solid fa-concierge-bell me-2"></i> Servicios Admin</a></li>
+        <li><a href="{% url 'reservas_ad' %}" class="nav-link"><i class="fa-solid fa-calendar-check me-2"></i> Reservas Admin</a></li>
+        <li><a href="{% url 'pagos_ad' %}" class="nav-link"><i class="fa-solid fa-credit-card me-2"></i> Pagos y Abonos</a></li>
+        <li><a href="{% url 'lista_usuarios' %}" class="nav-link active"><i class="fa-solid fa-users me-2"></i> Huéspedes / Users</a></li>
+        <li><a href="{% url 'galeria_ad' %}" class="nav-link"><i class="fa-solid fa-images me-2"></i> Galería Admin</a></li> 
+        <li><a href="{% url 'reportes_ad' %}" class="nav-link"><i class="fa-solid fa-chart-line me-2"></i> Reportes y Estadísticas</a></li>
+        <li><a href="{% url 'configuracion_ad' %}" class="nav-link"><i class="fa-solid fa-gear me-2"></i> Configuración</a></li>
+        
+        <li><hr class="text-secondary my-2"></li>
+        <li><span class="text-uppercase text-warning fw-bold px-3" style="font-size: 0.7rem;">Módulos de Mostrador</span></li>
+        
+        <li><a href="{% url 'recepcion_registrar_huesped' %}" class="nav-link"><i class="fa-solid fa-user-plus me-2"></i> Registrar Huéspedes</a></li>
+        <li><a href="{% url 'recepcion_reservas' %}" class="nav-link"><i class="fa-solid fa-calendar-days me-2"></i> Crear & Ver Reservas</a></li>
+        <li><a href="{% url 'recepcion_disponibilidad' %}" class="nav-link"><i class="fa-solid fa-bed me-2"></i> Consultar Disponibilidad</a></li>
+        <li><a href="{% url 'recepcion_checkin_checkout' %}" class="nav-link"><i class="fa-solid fa-right-to-bracket me-2"></i> Check-in / Check-out</a></li>
+        <li><a href="{% url 'recepcion_pagos' %}" class="nav-link"><i class="fa-solid fa-cash-register me-2"></i> Registrar Pagos Mostrador</a></li>
+       
+    </ul>
+    <hr class="text-secondary">
+    <ul class="nav nav-pills flex-column gap-1">
+        <li><a href="{% url 'home' %}" class="nav-link text-warning fw-semibold"><i class="fa-solid fa-house me-2"></i> Ver Sitio Web</a></li>
+        <li>
+            <form action="{% url 'logout' %}" method="POST" class="m-0">
+                {% csrf_token %}
+                <button type="submit" class="nav-link text-danger fw-semibold border-0 bg-transparent w-100 text-start"><i class="fa-solid fa-right-from-bracket me-2"></i> Cerrar Sesión</button>
+            </form>
+        </li>
+    </ul>
+</div>
+        <div class="flex-grow-1 p-4" style="margin-left: 280px; min-height: 100vh; display: flex; flex-direction: column;">
+            <div class="container-fluid flex-grow-1">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2><i class="fa-solid fa-users-gear text-primary me-2"></i>Gestión de Usuarios y Roles</h2>
+                        <p class="text-muted mb-0">Control de cuentas: Administrador, Recepcionista y Clientes</p>
+                    </div>
+                    <a href="{% url 'crear_usuario' %}" class="btn btn-primary btn-sm">
+                        <i class="fa-solid fa-user-plus me-1"></i> Nuevo Usuario
+                    </a>
+                </div>
+
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <div class="card shadow-sm border-0 rounded-4">
+                    <div class="card-body p-4">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Usuario</th>
+                                        <th>Correo Electrónico</th>
+                                        <th>Rol del Sistema</th>
+                                        <th>Fecha de Registro</th>
+                                        <th class="text-center">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for u in usuarios %}
+                                    <tr>
+                                        <td class="fw-bold">#{{ u.id }}</td>
+                                        <td>{{ u.username }}</td>
+                                        <td>{{ u.email|default:"No registrado" }}</td>
+                                        <td>
+                                            {% if u.is_superuser or u.username == 'jorge' %}
+                                                <span class="badge bg-danger mb-1"><i class="fa-solid fa-user-shield"></i> Administrador General</span><br>
+                                            {% elif u.is_staff %}
+                                                <span class="badge bg-warning text-dark mb-1"><i class="fa-solid fa-user-tie"></i> Recepcionista / Staff</span><br>
+                                            {% else %}
+                                                <span class="badge bg-info text-dark mb-1"><i class="fa-solid fa-user"></i> Cliente / Usuario Base</span><br>
+                                            {% endif %}
+
+                                            {% if u.is_active %}
+                                                <span class="badge bg-success">Activo</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">Desactivado</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ u.date_joined|date:"d/m/Y H:i" }}</td>
+                                        <td class="text-center">
+                                            {% if u != request.user and u.username != 'jorge' %}
+                                                <div class="btn-group" role="group">
+                                                    <!-- Botón para alternar rol entre Cliente y Recepcionista -->
+                                                    <form action="{% url 'cambiar_rol_usuario' u.id %}" method="POST" class="d-inline">
+                                                        {% csrf_token %}
+                                                        {% if u.is_staff %}
+                                                            <button type="submit" class="btn btn-outline-warning btn-sm" title="Quitar rol de Recepcionista">
+                                                                <i class="fa-solid fa-user-minus"></i> Quitar Staff
+                                                            </button>
+                                                        {% else %}
+                                                            <button type="submit" class="btn btn-outline-success btn-sm" title="Asignar rol de Recepcionista">
+                                                                <i class="fa-solid fa-user-tie"></i> Hacer Recepcionista
+                                                            </button>
+                                                        {% endif %}
+                                                    </form>
+
+                                                    <form action="{% url 'toggle_estado_usuario' u.id %}" method="POST" class="d-inline ms-1">
+                                                        {% csrf_token %}
+                                                        {% if u.is_active %}
+                                                            <button type="submit" class="btn btn-outline-secondary btn-sm" title="Desactivar cuenta">
+                                                                <i class="fa-solid fa-ban"></i>
+                                                            </button>
+                                                        {% else %}
+                                                            <button type="submit" class="btn btn-outline-primary btn-sm" title="Activar cuenta">
+                                                                <i class="fa-solid fa-check"></i>
+                                                            </button>
+                                                        {% endif %}
+                                                    </form>
+
+                                                    <a href="{% url 'editar_usuario' u.id %}" class="btn btn-outline-info btn-sm ms-1" title="Editar usuario">
+                                                        <i class="fa-solid fa-pen"></i>
+                                                    </a>
+
+                                                    <form action="{% url 'eliminar_usuario' u.id %}" method="POST" class="d-inline ms-1" onsubmit="return confirm('¿Estás seguro de eliminar este usuario?');">
+                                                        {% csrf_token %}
+                                                        <button type="submit" class="btn btn-outline-danger btn-sm" title="Eliminar usuario">
+                                                            <i class="fa-solid fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            {% else %}
+                                                <span class="text-muted small fst-italic">(Cuenta Protegida)</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted py-4">No hay usuarios registrados en el sistema.</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="text-center py-3 text-muted small mt-auto border-top">
+                <p class="mb-0">SysHSENA 2026 - Hotel Real Caribe | Riohacha, La Guajira</p>
+            </footer>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

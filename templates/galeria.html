@@ -1,0 +1,203 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galería - Hotel Real Caribe</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body class="d-flex flex-column min-vh-100">
+
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-caribe py-2 shadow-sm sticky-top" style="background-color: #0a2540 !important;">
+        <div class="container">
+            <a class="navbar-brand fw-bold d-flex align-items-center gap-3" href="{% url 'home' %}">
+                <img src="{% static 'img/logo2.png' %}" alt="Logo Hotel Real Caribe" class="brand-logo-img">
+                <span style="color: #c5a059 !important; font-size: 1.4rem;">{{ nombre_hotel|default:"Hotel Real Caribe" }}</span>
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
+                <ul class="navbar-nav align-items-lg-center mx-auto gap-lg-2">
+                    <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">HOME</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'home' %}#nosotros">NOSOTROS</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'habitaciones' %}">HABITACIONES</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'galeria' %}">GALERÍA</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'contactanos' %}">CONTÁCTENOS</a></li>
+                </ul>
+
+                <ul class="navbar-nav align-items-center gap-2">
+                
+                    <li class="nav-item">
+                        <button id="darkModeToggle" class="btn btn-outline-light btn-sm rounded-circle p-2" title="Cambiar Modo Claro/Oscuro" style="width: 38px; height: 38px;">
+                            <i class="fa-solid fa-moon" id="themeIcon"></i>
+                        </button>
+                    </li>
+
+                    {% if user.is_authenticated %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center gap-2 text-white py-1 px-2 rounded-pill" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="background-color: rgba(255, 255, 255, 0.1);">
+                                <img src="https://ui-avatars.com/api/?name={{ user.username }}&background=204a7a&color=fff" alt="Perfil" class="rounded-circle border border-white shadow-sm" style="width: 32px; height: 32px; object-fit: cover;">
+                                <span class="fw-semibold text-info">{{ user.username }}</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 mt-2">
+                                {% if user.is_staff or user.is_superuser %}
+                                    <li><a class="dropdown-item py-2" href="{% url 'dashboard' %}"><i class="fa-solid fa-gauge me-2 text-primary"></i> Panel Administrativo</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                {% endif %}
+                                <li>
+                                    <form action="{% url 'logout' %}" method="POST" class="px-3 py-1 m-0">
+                                        {% csrf_token %}
+                                        <button type="submit" class="dropdown-item text-danger p-0 fw-semibold bg-transparent border-0 w-100 text-start">
+                                            <i class="fa-solid fa-right-from-bracket me-2"></i> Cerrar Sesión
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a href="{% url 'login' %}" class="btn btn-outline-light btn-sm px-4 py-2 fw-semibold rounded-pill">
+                                <i class="fa-solid fa-user me-1"></i> Iniciar Sesión
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5 flex-grow-1">
+        <div class="row text-center mb-5">
+            <div class="col">
+                <h1 class="fw-bold text-primary display-5">Nuestra Galería</h1>
+                <p class="text-muted lead">Conoce las instalaciones y espacios exclusivos del Hotel Real Caribe en Riohacha, La Guajira.</p>
+                <div class="mx-auto bg-primary rounded-pill mt-3" style="width: 60px; height: 4px;"></div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            {% for item in fotos %}
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 h-100 overflow-hidden rounded-4 transition-card bg-white">
+                    <div class="overflow-hidden position-relative" style="height: 260px; cursor: pointer;">
+                        <img src="{{ item.imagen.url }}" class="card-img-top w-100 h-100 object-fit-cover galeria-img" alt="{{ item.titulo }}" data-bs-toggle="modal" data-bs-target="#modalVisor" data-img-url="{{ item.imagen.url }}" data-img-titulo="{{ item.titulo|default:'Hotel Real Caribe' }}" data-index="{{ forloop.counter0 }}">
+                    </div>
+                    <div class="card-body text-center p-4">
+                        <h5 class="card-title fw-bold text-dark mb-0">{{ item.titulo|default:"Hotel Real Caribe" }}</h5>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center py-5">
+                <div class="alert alert-info border-0 shadow-sm rounded-4 p-4 d-inline-block">
+                    <i class="fa-solid fa-images fa-2x mb-2 text-primary d-block"></i>
+                    No hay imágenes disponibles en la galería por el momento.
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <div class="modal fade" id="modalVisor" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content bg-dark border-0 rounded-4 overflow-hidden shadow-lg">
+                <div class="modal-header border-0 bg-black bg-opacity-50 text-white py-2">
+                    <h5 class="modal-title fs-6 text-truncate" id="visorTitulo">Título de la imagen</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0 text-center position-relative d-flex align-items-center justify-content-center bg-black" style="min-height: 400px;">
+                    <button type="button" class="position-absolute start-0 btn btn-dark text-white ms-3 rounded-circle d-flex align-items-center justify-content-center shadow" id="btnAnterior" style="width: 45px; height: 45px; z-index: 10; background: rgba(0,0,0,0.6); border: none;">
+                        <i class="fa-solid fa-chevron-left fs-5"></i>
+                    </button>
+                    
+                    <img src="" id="visorImagen" class="img-fluid object-fit-contain w-100" style="max-height: 75vh;" alt="Imagen Ampliada">
+
+                    <button type="button" class="position-absolute end-0 btn btn-dark text-white me-3 rounded-circle d-flex align-items-center justify-content-center shadow" id="btnSiguiente" style="width: 45px; height: 45px; z-index: 10; background: rgba(0,0,0,0.6); border: none;">
+                        <i class="fa-solid fa-chevron-right fs-5"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-white text-center py-3 mt-auto shadow-sm" style="background-color: #0a2540;">
+        <div class="container">
+            <p class="mb-0 small">© 2026 - Hotel Real Caribe (Riohacha, La Guajira) | Todos los derechos reservados</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const galeriaImgs = document.querySelectorAll('.galeria-img');
+        const visorImagen = document.getElementById('visorImagen');
+        const visorTitulo = document.getElementById('visorTitulo');
+        const btnAnterior = document.getElementById('btnAnterior');
+        const btnSiguiente = document.getElementById('btnSiguiente');
+        
+        let indiceActual = 0;
+        const totalImgs = galeriaImgs.length;
+
+        function actualizarVisor(index) {
+            if (totalImgs === 0) return;
+            indiceActual = (index + totalImgs) % totalImgs;
+            const imgSeleccionada = galeriaImgs[indiceActual];
+            
+            visorImagen.src = imgSeleccionada.getAttribute('data-img-url');
+            visorTitulo.innerText = imgSeleccionada.getAttribute('data-img-titulo');
+        }
+
+        galeriaImgs.forEach((img, index) => {
+            img.addEventListener('click', function() {
+                actualizarVisor(index);
+            });
+        });
+
+        btnAnterior.addEventListener('click', function() {
+            actualizarVisor(indiceActual - 1);
+        });
+
+        btnSiguiente.addEventListener('click', function() {
+            actualizarVisor(indiceActual + 1);
+        });
+
+        document.addEventListener('keydown', function(e) {
+            const modalVisor = document.getElementById('modalVisor');
+            if (modalVisor.classList.contains('show')) {
+                if (e.key === 'ArrowLeft') actualizarVisor(indiceActual - 1);
+                if (e.key === 'ArrowRight') actualizarVisor(indiceActual + 1);
+            }
+        });
+
+    
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const body = document.body;
+
+        if (localStorage.getItem('theme') === 'dark') {
+            body.classList.add('dark-mode');
+            themeIcon.classList.replace('fa-moon', 'fa-sun');
+        }
+
+        darkModeToggle.addEventListener('click', function() {
+            body.classList.toggle('dark-mode');
+            
+            if (body.classList.contains('dark-mode')) {
+                localStorage.setItem('theme', 'dark');
+                themeIcon.classList.replace('fa-moon', 'fa-sun');
+            } else {
+                localStorage.setItem('theme', 'light');
+                themeIcon.classList.replace('fa-sun', 'fa-moon');
+            }
+        });
+    </script>
+</body>
+</html>

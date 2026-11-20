@@ -1,0 +1,155 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuración - SysHSENA</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"> 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body class="bg-light">
+    <div class="d-flex">
+    <div class="sidebar-caribe d-flex flex-column flex-shrink-0 p-3 text-white position-fixed shadow" >
+    <a href="{% url 'dashboard' %}" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none px-2">
+        <span class="fs-4 fw-bold">Hotel Real Caribe</span>
+    </a>
+    <div class="px-2 mb-3">
+        <span class="badge bg-warning text-dark rounded-pill px-3 py-1 fw-semibold" style="font-size: 0.75rem;">Panel General (Admin & Recepción)</span>
+    </div>
+    <hr class="text-secondary">
+    <ul class="nav nav-pills flex-column mb-auto gap-1" style="overflow-y: auto; max-height: calc(100vh - 250px);">
+        <li><a href="{% url 'dashboard' %}" class="nav-link"><i class="fa-solid fa-gauge me-2"></i> Dashboard Admin</a></li>
+        <li><a href="{% url 'habitaciones_ad' %}" class="nav-link"><i class="fa-solid fa-bed me-2"></i> Habitaciones</a></li>
+        <li><a href="{% url 'servicios_ad' %}" class="nav-link"><i class="fa-solid fa-concierge-bell me-2"></i> Servicios Admin</a></li>
+        <li><a href="{% url 'reservas_ad' %}" class="nav-link"><i class="fa-solid fa-calendar-check me-2"></i> Reservas Admin</a></li>
+        <li><a href="{% url 'pagos_ad' %}" class="nav-link"><i class="fa-solid fa-credit-card me-2"></i> Pagos y Abonos</a></li>
+        <li><a href="{% url 'lista_usuarios' %}" class="nav-link"><i class="fa-solid fa-users me-2"></i> Huéspedes / Users</a></li>
+        <li><a href="{% url 'galeria_ad' %}" class="nav-link"><i class="fa-solid fa-images me-2"></i> Galería Admin</a></li> 
+        <li><a href="{% url 'reportes_ad' %}" class="nav-link"><i class="fa-solid fa-chart-line me-2"></i> Reportes y Estadísticas</a></li>
+        <li><a href="{% url 'configuracion_ad' %}" class="nav-link active"><i class="fa-solid fa-gear me-2"></i> Configuración</a></li>
+        
+        <li><hr class="text-secondary my-2"></li>
+        <li><span class="text-uppercase text-warning fw-bold px-3" style="font-size: 0.7rem;">Módulos de Mostrador</span></li>
+        
+        <li><a href="{% url 'recepcion_registrar_huesped' %}" class="nav-link"><i class="fa-solid fa-user-plus me-2"></i> Registrar Huéspedes</a></li>
+        <li><a href="{% url 'recepcion_reservas' %}" class="nav-link"><i class="fa-solid fa-calendar-days me-2"></i> Crear & Ver Reservas</a></li>
+        <li><a href="{% url 'recepcion_disponibilidad' %}" class="nav-link"><i class="fa-solid fa-bed me-2"></i> Consultar Disponibilidad</a></li>
+        <li><a href="{% url 'recepcion_checkin_checkout' %}" class="nav-link"><i class="fa-solid fa-right-to-bracket me-2"></i> Check-in / Check-out</a></li>
+        <li><a href="{% url 'recepcion_pagos' %}" class="nav-link"><i class="fa-solid fa-cash-register me-2"></i> Registrar Pagos Mostrador</a></li>
+      
+    </ul>
+    <hr class="text-secondary">
+    <ul class="nav nav-pills flex-column gap-1">
+        <li><a href="{% url 'home' %}" class="nav-link text-warning fw-semibold"><i class="fa-solid fa-house me-2"></i> Ver Sitio Web</a></li>
+        <li>
+            <form action="{% url 'logout' %}" method="POST" class="m-0">
+                {% csrf_token %}
+                <button type="submit" class="nav-link text-danger fw-semibold border-0 bg-transparent w-100 text-start"><i class="fa-solid fa-right-from-bracket me-2"></i> Cerrar Sesión</button>
+            </form>
+        </li>
+    </ul>
+</div>
+        
+        <div class="flex-grow-1 p-4" style="margin-left: 280px; min-height: 100vh; display: flex; flex-direction: column;">
+            <div class="container-fluid flex-grow-1">
+                
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2 class="fw-bold text-dark mb-1"><i class="fa-solid fa-gear text-primary me-2"></i>Configuración del Sistema</h2>
+                        <p class="text-muted mb-0">Parámetros generales, datos corporativos y preferencias de gestión del Hotel Real Caribe en Riohacha.</p>
+                    </div>
+                </div>
+
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-success alert-dismissible fade show shadow-sm rounded-3" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+            
+                <div class="row g-4">
+                    
+                
+                    <div class="col-lg-6">
+                        <div class="card shadow-sm border-0 rounded-4 p-4 bg-white h-100">
+                            <h5 class="fw-bold text-dark mb-3"><i class="fa-solid fa-hotel text-primary me-2"></i>Información del Establecimiento</h5>
+                            <form>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-semibold text-muted">Nombre del Hotel</label>
+                                    <input type="text" class="form-control" value="Hotel Real Caribe" readonly>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-semibold text-muted">Ubicación / Dirección</label>
+                                    <input type="text" class="form-control" value="Calle 12 # 7-45, Barrio Centro, Riohacha, La Guajira">
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label small fw-semibold text-muted">NIT del Hotel</label>
+                                        <input type="text" class="form-control" value="900.123.456-7">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label small fw-semibold text-muted">Moneda Oficial</label>
+                                        <input type="text" class="form-control" value="COP ($)" readonly>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-primary btn-sm px-4 fw-bold" onclick="alert('Cambios guardados correctamente.');">Guardar Cambios</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    
+                    <div class="col-lg-6">
+                        <div class="card shadow-sm border-0 rounded-4 p-4 bg-white h-100">
+                            <h5 class="fw-bold text-dark mb-3"><i class="fa-solid fa-sliders text-primary me-2"></i>Preferencias de Notificaciones</h5>
+                            <form>
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" id="notifEmail" checked>
+                                    <label class="form-check-label fw-semibold text-secondary small" for="notifEmail">Enviar correos automáticos al confirmar reservas</label>
+                                </div>
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" id="notifDevolucion" checked>
+                                    <label class="form-check-label fw-semibold text-secondary small" for="notifDevolucion">Notificar al cliente en caso de devolución de dinero</label>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-semibold text-muted">Correo Remitente del Sistema (SMTP)</label>
+                                    <input type="email" class="form-control" value="jorgeandresramosguale@gmail.com">
+                                </div>
+                                <button type="button" class="btn btn-primary btn-sm px-4 fw-bold" onclick="alert('Preferencias actualizadas.');">Actualizar Preferencias</button>
+                            </form>
+                        </div>
+                    </div>
+
+                
+                    <div class="col-lg-12">
+                        <div class="card shadow-sm border-0 rounded-4 p-4 bg-white">
+                            <h5 class="fw-bold text-dark mb-2"><i class="fa-solid fa-database text-warning me-2"></i>Respaldo y Mantenimiento de Base de Datos</h5>
+                            <p class="text-muted small mb-3">Realiza copias de seguridad periódicas de los registros de reservas, huéspedes, pagos y habitaciones de SysHSENA.</p>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-sm btn-outline-dark fw-semibold" onclick="alert('Copia de seguridad generada y descargada con éxito.');">
+                                    <i class="fa-solid fa-download me-1"></i> Descargar Backup (SQL / JSON)
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-danger fw-semibold" onclick="confirm('¿Estás seguro de optimizar las tablas de la base de datos?');">
+                                    <i class="fa-solid fa-broom me-1"></i> Optimizar Base de Datos
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <footer class="text-center py-3 text-muted small mt-auto border-top">
+                <p class="mb-0">SysHSENA 2026 - Hotel Real Caribe | Riohacha, La Guajira</p>
+            </footer>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

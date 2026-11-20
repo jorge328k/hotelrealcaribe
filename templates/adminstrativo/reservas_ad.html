@@ -1,0 +1,222 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Reservas - SysHSENA</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body class="bg-light">
+    <div class="d-flex">
+      
+        <div class="sidebar-caribe d-flex flex-column flex-shrink-0 p-3 text-white position-fixed shadow" >
+    <a href="{% url 'dashboard' %}" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none px-2">
+        <span class="fs-4 fw-bold">Hotel Real Caribe</span>
+    </a>
+    <div class="px-2 mb-3">
+        <span class="badge bg-warning text-dark rounded-pill px-3 py-1 fw-semibold" style="font-size: 0.75rem;">Panel General (Admin & Recepción)</span>
+    </div>
+    <hr class="text-secondary">
+    <ul class="nav nav-pills flex-column mb-auto gap-1" style="overflow-y: auto; max-height: calc(100vh - 250px);">
+        <li><a href="{% url 'dashboard' %}" class="nav-link"><i class="fa-solid fa-gauge me-2"></i> Dashboard Admin</a></li>
+        <li><a href="{% url 'habitaciones_ad' %}" class="nav-link"><i class="fa-solid fa-bed me-2"></i> Habitaciones</a></li>
+        <li><a href="{% url 'servicios_ad' %}" class="nav-link"><i class="fa-solid fa-concierge-bell me-2"></i> Servicios Admin</a></li>
+        <li><a href="{% url 'reservas_ad' %}" class="nav-link active"><i class="fa-solid fa-calendar-check me-2"></i> Reservas Admin</a></li>
+        <li><a href="{% url 'pagos_ad' %}" class="nav-link"><i class="fa-solid fa-credit-card me-2"></i> Pagos y Abonos</a></li>
+        <li><a href="{% url 'lista_usuarios' %}" class="nav-link"><i class="fa-solid fa-users me-2"></i> Huéspedes / Users</a></li>
+        <li><a href="{% url 'galeria_ad' %}" class="nav-link"><i class="fa-solid fa-images me-2"></i> Galería Admin</a></li> 
+        <li><a href="{% url 'reportes_ad' %}" class="nav-link"><i class="fa-solid fa-chart-line me-2"></i> Reportes y Estadísticas</a></li>
+        <li><a href="{% url 'configuracion_ad' %}" class="nav-link"><i class="fa-solid fa-gear me-2"></i> Configuración</a></li>
+        
+        <li><hr class="text-secondary my-2"></li>
+        <li><span class="text-uppercase text-warning fw-bold px-3" style="font-size: 0.7rem;">Módulos de Mostrador</span></li>
+        
+        <li><a href="{% url 'recepcion_registrar_huesped' %}" class="nav-link"><i class="fa-solid fa-user-plus me-2"></i> Registrar Huéspedes</a></li>
+        <li><a href="{% url 'recepcion_reservas' %}" class="nav-link"><i class="fa-solid fa-calendar-days me-2"></i> Crear & Ver Reservas</a></li>
+        <li><a href="{% url 'recepcion_disponibilidad' %}" class="nav-link"><i class="fa-solid fa-bed me-2"></i> Consultar Disponibilidad</a></li>
+        <li><a href="{% url 'recepcion_checkin_checkout' %}" class="nav-link"><i class="fa-solid fa-right-to-bracket me-2"></i> Check-in / Check-out</a></li>
+        <li><a href="{% url 'recepcion_pagos' %}" class="nav-link"><i class="fa-solid fa-cash-register me-2"></i> Registrar Pagos Mostrador</a></li>
+        
+    </ul>
+    <hr class="text-secondary">
+    <ul class="nav nav-pills flex-column gap-1">
+        <li><a href="{% url 'home' %}" class="nav-link text-warning fw-semibold"><i class="fa-solid fa-house me-2"></i> Ver Sitio Web</a></li>
+        <li>
+            <form action="{% url 'logout' %}" method="POST" class="m-0">
+                {% csrf_token %}
+                <button type="submit" class="nav-link text-danger fw-semibold border-0 bg-transparent w-100 text-start"><i class="fa-solid fa-right-from-bracket me-2"></i> Cerrar Sesión</button>
+            </form>
+        </li>
+    </ul>
+</div>
+    
+        <div class="flex-grow-1 p-4" style="margin-left: 280px; min-height: 100vh; display: flex; flex-direction: column;">
+            <div class="container-fluid flex-grow-1">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2 class="fw-bold text-dark mb-1"><i class="fa-solid fa-calendar-check text-primary me-2"></i>Gestión de Reservas</h2>
+                        <p class="text-muted mb-0">Controla las reservaciones y estancias activas en el hotel.</p>
+                    </div>
+                    
+                    <button type="button" class="btn btn-primary fw-semibold" data-bs-toggle="modal" data-bs-target="#modalCrearReserva">
+                        <i class="fa-solid fa-plus me-1"></i> Nueva Reserva
+                    </button>
+                </div>
+
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-success alert-dismissible fade show shadow-sm rounded-3" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <div class="card shadow-sm border-0 rounded-4 p-4 bg-white">
+                    <div class="table-responsive">
+                        <table class="table align-middle table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th># ID</th>
+                                    <th>Huésped</th>
+                                    <th>Habitación</th>
+                                    <th>Entrada</th>
+                                    <th>Salida</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if reservas %}
+                                    {% for res in reservas %}
+                                    <tr>
+                                        <td class="fw-bold">#{{ res.id }}</td>
+                                        <td>{{ res.huesped.nombres }} {{ res.huesped.apellidos }}</td>
+                                        <td>Habitación #{{ res.habitacion.numero }}</td>
+                                        <td>{{ res.fecha_entrada }}</td>
+                                        <td>{{ res.fecha_salida }}</td>
+                                        <td>
+                                            {% if res.estado == 'PENDIENTE' %}
+                                                <span class="badge bg-warning text-dark">Pendiente</span>
+                                            {% elif res.estado == 'CONFIRMADA' %}
+                                                <span class="badge bg-success">Confirmada</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">Cancelada</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <form method="POST" class="d-inline">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="reserva_id" value="{{ res.id }}">
+                                                {% if res.estado == 'PENDIENTE' %}
+                                                    <button type="submit" name="accion" value="aceptar" class="btn btn-sm btn-success text-white" title="Aceptar Reserva y Registrar Pago">
+                                                        <i class="fa-solid fa-check"></i>
+                                                    </button>
+                                                    <button type="submit" name="accion" value="cancelar" class="btn btn-sm btn-danger text-white" title="Cancelar Reserva">
+                                                        <i class="fa-solid fa-xmark"></i>
+                                                    </button>
+                                                {% else %}
+                                                    <span class="text-muted small fw-semibold">Procesada</span>
+                                                {% endif %}
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="7" class="text-center py-4 text-muted">No hay reservas registradas en el sistema por el momento.</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="text-center py-3 text-muted small mt-auto border-top">
+                <p class="mb-0">SysHSENA 2026 - Hotel Real Caribe | Riohacha, La Guajira</p>
+            </footer>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="modalCrearReserva" tabindex="-1" aria-labelledby="modalCrearReservaLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header bg-primary text-white rounded-top-4">
+                    <h5 class="modal-title fw-bold" id="modalCrearReservaLabel"><i class="fa-solid fa-calendar-plus me-2"></i>Crear Nueva Reserva (Admin)</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="POST" action="{% url 'crear_reserva_ad' %}">
+                    {% csrf_token %}
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-secondary small">Seleccionar Huésped / Usuario</label>
+                            <select class="form-select" name="usuario_id" required>
+                                <option value="" selected disabled>-- Seleccione un usuario --</option>
+                                {% for u in usuarios_lista %}
+                                    <option value="{{ u.id }}">{{ u.username }} ({{ u.email|default:"Sin correo" }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-secondary small">Habitación Disponible</label>
+                            <select class="form-select" name="habitacion_id" required>
+                                <option value="" selected disabled>-- Seleccione una habitación --</option>
+                                {% for h in habitaciones_lista %}
+                                    <option value="{{ h.id }}">Habitación #{{ h.numero }} - {{ h.tipo_habitacion.nombre }} (${{ h.precio }} COP)</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-secondary small">Fecha de Entrada (Check-In)</label>
+                            <input type="date" class="form-control" name="fecha_entrada" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-secondary small">Fecha de Salida (Check-Out)</label>
+                            <input type="date" class="form-control" name="fecha_salida" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-secondary small">Método de Pago</label>
+                            <select class="form-select" id="selectMetodoPagoAdmin" name="metodo_pago">
+                                <option value="EFECTIVO" selected>Efectivo</option>
+                                <option value="TARJETA">Tarjeta de Crédito / Débito</option>
+                                <option value="TRANSFERENCIA">Transferencia (Nequi / Bancolombia)</option>
+                            </select>
+                        </div>
+                        <div class="mb-3 d-none" id="contenedorTarjetaAdmin">
+                            <label class="form-label fw-semibold text-secondary small">Número de Tarjeta</label>
+                            <input type="text" class="form-control" id="numeroTarjetaAdmin" name="numero_tarjeta" placeholder="1234 5678 9012 3456" maxlength="19">
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light rounded-bottom-4">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary btn-sm px-4 fw-bold">Guardar Reserva futura</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const selectMetodoPagoAdmin = document.getElementById('selectMetodoPagoAdmin');
+        const contenedorTarjetaAdmin = document.getElementById('contenedorTarjetaAdmin');
+        const numeroTarjetaAdmin = document.getElementById('numeroTarjetaAdmin');
+
+        selectMetodoPagoAdmin.addEventListener('change', function() {
+            if (this.value === 'TARJETA') {
+                contenedorTarjetaAdmin.classList.remove('d-none');
+                numeroTarjetaAdmin.setAttribute('required', 'required');
+            } else {
+                contenedorTarjetaAdmin.classList.add('d-none');
+                numeroTarjetaAdmin.removeAttribute('required');
+                numeroTarjetaAdmin.value = '';
+            }
+        });
+    </script>
+</body>
+</html>
