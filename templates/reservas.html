@@ -104,27 +104,35 @@
 
                 <div class="mb-3 p-3 rounded-3 text-white text-center shadow-sm" style="background-color: #0a2540;">
                     <span class="small text-uppercase tracking-wider">Total Estimado de la Estadía:</span>
-                    <h3 id="textoTotal" class="fw-bold mb-0 text-info">$0 COP</h3>
+                    <h3 id="textoTotal" class="fw-bold mb-1 text-info">$0 COP</h3>
+                    <div class="small text-warning fw-semibold" id="textoAbono">
+                        Abono requerido al ser aceptada (30%): $0 COP
+                    </div>
+                    <div class="small text-white-50" id="textoRestante">
+                        Saldo restante (70%): $0 COP
+                    </div>
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label fw-semibold">Método de Pago</label>
                     <select class="form-select" id="selectMetodoPago" name="metodo_pago" required>
                         <option value="" disabled selected>-- Selecciona un método de pago --</option>
-                        <option value="EFECTIVO">Efectivo</option>
                         <option value="TRANSFERENCIA">Transferencia Bancaria</option>
                         <option value="TARJETA">Tarjeta</option>
                     </select>
+                    <div class="form-text small text-muted">
+                        Cuando la administración acepte tu reserva, deberás realizar un abono del 30% por el método elegido.
+                    </div>
                 </div>
 
                 <div class="mb-3 d-none" id="contenedorNumeroTarjeta">
                     <label class="form-label fw-semibold text-primary"><i class="fa-solid fa-credit-card me-2"></i>Número de Tarjeta</label>
-                    <input type="text" class="form-control" id="numeroTarjeta" name="numero_tarjeta" placeholder="1234 5678 9012 3456" maxlength="19">
+                    <input type="text" inputmode="numeric" class="form-control" id="numeroTarjeta" name="numero_tarjeta" placeholder="1234 5678 9012 3456" maxlength="19">
                     <div class="form-text small text-muted">Introduce los 16 dígitos de tu tarjeta de crédito o débito.</div>
                 </div>
 
                 <div class="d-grid mt-4">
-                    <button type="submit" class="btn btn-primary btn-lg fw-bold shadow-sm" style="background-color: #204a7a; border: none;">Confirmar Reserva y Pago</button>
+                    <button type="submit" class="btn btn-primary btn-lg fw-bold shadow-sm" style="background-color: #204a7a; border: none;">Solicitar Reserva</button>
                 </div>
             </form>
         </div>
@@ -138,6 +146,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        const PORCENTAJE_ABONO = 0.30;
         const inputFechaEntrada = document.getElementById('fechaEntrada');
         const inputFechaSalida = document.getElementById('fechaSalida');
 
@@ -161,6 +170,8 @@
         const selectHabitacion = document.getElementById('selectHabitacion');
         const checkboxesServicios = document.querySelectorAll('.servicio-check');
         const textoTotal = document.getElementById('textoTotal');
+        const textoAbono = document.getElementById('textoAbono');
+        const textoRestante = document.getElementById('textoRestante');
 
         function calcularTotal() {
             let precioPorDia = 0;
@@ -170,7 +181,6 @@
                 precioPorDia = parseFloat(selectedOption.getAttribute('data-precio')) || 0;
             }
 
-        
             let cantDias = 1; 
             if (inputFechaEntrada.value && inputFechaSalida.value) {
                 let fecha1 = new Date(inputFechaEntrada.value);
@@ -192,7 +202,12 @@
             });
 
             let granTotal = subtotalHabitacion + totalServicios;
+            let montoAbono = Math.round(granTotal * PORCENTAJE_ABONO);
+            let montoRestante = granTotal - montoAbono;
+
             textoTotal.innerText = `$${granTotal.toLocaleString('es-CO')} COP (${cantDias} ${cantDias === 1 ? 'día' : 'días'})`;
+            textoAbono.innerText = `Abono requerido al ser aceptada (30%): $${montoAbono.toLocaleString('es-CO')} COP`;
+            textoRestante.innerText = `Saldo restante (70%): $${montoRestante.toLocaleString('es-CO')} COP`;
         }
 
         selectHabitacion.addEventListener('change', calcularTotal);
@@ -215,6 +230,11 @@
                 inputNumeroTarjeta.removeAttribute('required');
                 inputNumeroTarjeta.value = '';
             }
+        });
+
+        inputNumeroTarjeta.addEventListener('input', function() {
+            let digitos = this.value.replace(/[^0-9]/g, '').slice(0, 16);
+            this.value = digitos.replace(/(.{4})/g, '$1 ').trim();
         });
     </script>
 </body>

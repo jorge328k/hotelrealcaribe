@@ -45,11 +45,13 @@ def _calcular_resumen_financiero_reserva(reserva):
     saldo_pendiente = valor_total - Decimal(str(valor_pagado))
     if saldo_pendiente < Decimal('0'):
         saldo_pendiente = Decimal('0')
+    abono_30 = (valor_total * Decimal('0.30')).quantize(Decimal('1'))
     return {
         'noches': noches,
         'valor_total': valor_total,
         'valor_pagado': Decimal(str(valor_pagado)),
         'saldo_pendiente': saldo_pendiente,
+        'abono_30': abono_30,
     }
 
 
@@ -418,30 +420,37 @@ def reservas_ad_view(request):
             reserva.save()
 
             resumen = _calcular_resumen_financiero_reserva(reserva)
-            metodo = request.session.pop('temp_metodo_pago_' + str(reserva.id), 'EFECTIVO')
+            metodo = request.session.pop('temp_metodo_pago_' + str(reserva.id), 'TRANSFERENCIA')
             monto_sesion = request.session.pop('temp_total_reserva_' + str(reserva.id), None)
+            request.session.pop('temp_abono_reserva_' + str(reserva.id), None)
+
             monto_estimado = Decimal(str(monto_sesion)) if monto_sesion is not None else resumen['valor_total']
+            porcentaje_abono = Decimal('0.30')
+            abono_requerido = (monto_estimado * porcentaje_abono).quantize(Decimal('1'))
+            saldo_restante = monto_estimado - abono_requerido
 
             messages.success(
                 request,
-                f'¡Reserva #{reserva.id} confirmada! El pago (${float(monto_estimado):,.0f} COP) queda pendiente para registro en Recepción.'
+                f'¡Reserva #{reserva.id} confirmada! Total: ${float(monto_estimado):,.0f} COP | Abono requerido (30%): ${float(abono_requerido):,.0f} COP por {metodo}.'
             )
 
             if correo_cliente:
                 try:
                     send_mail(
-                        subject=f"¡Reserva #{reserva.id} Aceptada y Confirmada! - Hotel Real Caribe",
+                        subject=f"¡Reserva #{reserva.id} Aceptada! Realiza tu abono del 30% - Hotel Real Caribe",
                         message=f"""Hola {reserva.huesped.nombres},
 
-Nos alegra informarte que tu reserva #{reserva.id} para la habitación #{reserva.habitacion.numero} ha sido ACEPTADA y CONFIRMADA por administración.
+Nos alegra informarte que tu reserva #{reserva.id} para la habitación #{reserva.habitacion.numero} ha sido ACEPTADA por administración.
 
-Detalles de tu estadía:
+Detalles de tu estadía y pago:
 - Entrada: {reserva.fecha_entrada}
 - Salida: {reserva.fecha_salida}
-- Total a pagar en recepción: ${float(monto_estimado):,.0f} COP
-- Método de pago preferido: {metodo}
+- Total de la estadía: ${float(monto_estimado):,.0f} COP
+- Abono requerido (30%): ${float(abono_requerido):,.0f} COP
+- Saldo restante (70%): ${float(saldo_restante):,.0f} COP
+- Método de pago seleccionado: {metodo}
 
-¡Te esperamos con los brazos abiertos en Riohacha, La Guajira!
+Por favor realiza el abono del 30% (${float(abono_requerido):,.0f} COP) mediante {metodo} para dejar tu reserva asegurada.
 
 Atentamente,
 Hotel Real Caribe""",
@@ -458,6 +467,7 @@ Hotel Real Caribe""",
 
             request.session.pop('temp_metodo_pago_' + str(reserva.id), None)
             request.session.pop('temp_total_reserva_' + str(reserva.id), None)
+            request.session.pop('temp_abono_reserva_' + str(reserva.id), None)
             reserva.estado = 'CANCELADA'
             reserva.save()
             reserva.delete()
@@ -1026,7 +1036,8 @@ def procesar_checkout(request, reserva_id):
 def recepcion_pagos_view(request):
     if request.method == 'POST':
         reserva_id = request.POST.get('reserva_id')
-        monto = Decimal(str(request.POST.get('monto', '0') or '0'))
+        monto_limpio = ''.join(ch for ch in str(request.POST.get('monto', '0') or '0') if ch.isdigit())
+        monto = Decimal(monto_limpio or '0')
         metodo_pago = request.POST.get('metodo_pago')
 
         reserva = get_object_or_404(Reserva, id=reserva_id)
@@ -1038,15 +1049,24 @@ def recepcion_pagos_view(request):
         resumen = _calcular_resumen_financiero_reserva(reserva)
         messages.success(
             request,
-            f'Pago de ${float(monto):,.0f} COP registrado. Total: ${float(resumen["valor_total"]):,.0f} | Pagado: ${float(resumen["valor_pagado"]):,.0f} | Saldo pendiente: ${float(resumen["saldo_pendiente"]):,.0f} COP (RN08).'
+            f'Pago de ${float(monto):,.0f} COP registrado. Total: ${float(resumen["valor_total"]):,.0f} | Abono (30%): ${float(resumen["abono_30"]):,.0f} | Pagado: ${float(resumen["valor_pagado"]):,.0f} | Saldo pendiente: ${float(resumen["saldo_pendiente"]):,.0f} COP (RN08).'
         )
         return redirect('recepcion_pagos')
 
-    reservas_activas = Reserva.objects.filter(estado__in=['PENDIENTE', 'CONFIRMADA', 'EN_ESTANCIA'])
-    resumenes = {r.id: _calcular_resumen_financiero_reserva(r) for r in reservas_activas}
+    reservas_activas = Reserva.objects.filter(estado__in=['PENDIENTE', 'CONFIRMADA', 'EN_ESTANCIA']).select_related('huesped', 'habitacion').prefetch_related('pagos', 'servicios_asociados__servicio')
+    reservas_detalle = []
+    for r in reservas_activas:
+        info = _calcular_resumen_financiero_reserva(r)
+        reservas_detalle.append({
+            'reserva': r,
+            'valor_total': info['valor_total'],
+            'abono_30': info['abono_30'],
+            'valor_pagado': info['valor_pagado'],
+            'saldo_pendiente': info['saldo_pendiente'],
+        })
     context = {
         'reservas_activas': reservas_activas,
-        'resumenes_reservas': resumenes,
+        'reservas_detalle': reservas_detalle,
     }
     return render(request, 'adminstrativo/registrar_pago_recepcion.html', context)
 
@@ -1073,9 +1093,13 @@ def reservas_view(request):
         hab_id = request.POST.get('habitacion')
         fecha_entrada_raw = request.POST.get('fecha_entrada')
         fecha_salida_raw = request.POST.get('fecha_salida')
-        metodo_pago = request.POST.get('metodo_pago', 'EFECTIVO')
+        metodo_pago = request.POST.get('metodo_pago', 'TRANSFERENCIA')
         servicios_seleccionados = request.POST.getlist('servicios_extra')
         cantidad_huespedes = int(request.POST.get('cantidad_huespedes', 1) or 1)
+
+        if metodo_pago not in ['TRANSFERENCIA', 'TARJETA']:
+            messages.error(request, 'Solo se permiten pagos por Transferencia Bancaria o Tarjeta.')
+            return redirect('reservas')
 
         habitacion = get_object_or_404(Habitacion, id=hab_id)
 
@@ -1118,6 +1142,8 @@ def reservas_view(request):
         for servicio in servicios_seleccionados:
             precio_total_estadia += precios_servicios.get(servicio, 0)
 
+        abono_requerido = round(precio_total_estadia * 0.30)
+
         correo_usuario_registro = request.user.email if request.user.email else 'cliente@realcaribe.com'
 
         huesped, _ = Huesped.objects.get_or_create(
@@ -1156,6 +1182,7 @@ def reservas_view(request):
 
         request.session['temp_metodo_pago_' + str(reserva.id)] = metodo_pago
         request.session['temp_total_reserva_' + str(reserva.id)] = precio_total_estadia
+        request.session['temp_abono_reserva_' + str(reserva.id)] = abono_requerido
 
         if correo_usuario_registro and correo_usuario_registro != 'cliente@realcaribe.com':
             try:
@@ -1164,6 +1191,8 @@ def reservas_view(request):
                     message=f"""Hola {huesped.nombres},
 
 Tu solicitud de reserva #{reserva.id} para la habitación #{habitacion.numero} ha sido registrada con éxito y se encuentra en estado PENDIENTE de revisión por parte de la administración del Hotel Real Caribe.
+
+Una vez sea aceptada, deberás abonar el 30% (${abono_requerido:,.0f} COP) mediante {metodo_pago}.
 
 Te notificaremos tan pronto sea aceptada.
 
@@ -1175,7 +1204,10 @@ Te notificaremos tan pronto sea aceptada.
             except Exception as e:
                 print(f"Error enviando correo de solicitud al cliente: {e}")
 
-        messages.success(request, f'¡Reserva #{reserva.id} realizada con éxito por un total de ${precio_total_estadia:,.0f} COP!')
+        messages.success(
+            request,
+            f'¡Solicitud de reserva #{reserva.id} enviada por ${precio_total_estadia:,.0f} COP! Al ser aceptada deberás abonar el 30% (${abono_requerido:,.0f} COP) por {metodo_pago}.'
+        )
         return redirect('habitaciones')
 
     context = {
