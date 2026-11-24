@@ -89,7 +89,7 @@
             <div class="col-md-4">
                 <div class="card shadow-sm border-0 h-100 overflow-hidden rounded-4 transition-card bg-white">
                     <div class="overflow-hidden position-relative" style="height: 260px; cursor: pointer;">
-                        <img src="{{ item.imagen.url }}" class="card-img-top w-100 h-100 object-fit-cover galeria-img" alt="{{ item.titulo }}" data-bs-toggle="modal" data-bs-target="#modalVisor" data-img-url="{{ item.imagen.url }}" data-img-titulo="{{ item.titulo|default:'Hotel Real Caribe' }}" data-index="{{ forloop.counter0 }}">
+                        <img src="{% static 'uploads/' %}{{ item.imagen.name }}" class="card-img-top w-100 h-100 object-fit-cover galeria-img" alt="{{ item.titulo }}" data-bs-toggle="modal" data-bs-target="#modalVisor" data-img-url="{% static 'uploads/' %}{{ item.imagen.name }}" data-img-titulo="{{ item.titulo|default:'Hotel Real Caribe' }}" data-index="{{ forloop.counter0 }}">
                     </div>
                     <div class="card-body text-center p-4">
                         <h5 class="card-title fw-bold text-dark mb-0">{{ item.titulo|default:"Hotel Real Caribe" }}</h5>

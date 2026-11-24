@@ -114,7 +114,7 @@
                                         <tr>
                                             <td>
                                                 <div class="overflow-hidden rounded-3 shadow-sm" style="width: 80px; height: 55px;">
-                                                    <img src="{{ item.imagen.url }}" alt="{{ item.titulo }}" class="w-100 h-100 object-fit-cover">
+                                                    <img src="{% static 'uploads/' %}{{ item.imagen.name }}" alt="{{ item.titulo }}" class="w-100 h-100 object-fit-cover">
                                                 </div>
                                             </td>
                                             <td class="fw-semibold text-dark">{{ item.titulo|default:"Sin título" }}</td>

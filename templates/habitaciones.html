@@ -89,7 +89,7 @@
                         </span>
                         
                         {% if hab.imagen %}
-                            <img src="{{ hab.imagen.url }}" alt="Habitación #{{ hab.numero }}" class="card-img-top img-fluid" style="height: 220px; object-fit: cover; cursor: pointer;" data-bs-toggle="modal" data-bs-target="#imageModal" data-img-url="{{ hab.imagen.url }}" data-img-title="Habitación #{{ hab.numero }} - {{ hab.tipo_habitacion.nombre }}">
+                            <img src="{% static 'uploads/' %}{{ hab.imagen.name }}" alt="Habitación #{{ hab.numero }}" class="card-img-top img-fluid" style="height: 220px; object-fit: cover; cursor: pointer;" data-bs-toggle="modal" data-bs-target="#imageModal" data-img-url="{% static 'uploads/' %}{{ hab.imagen.name }}" data-img-title="Habitación #{{ hab.numero }} - {{ hab.tipo_habitacion.nombre }}">
                         {% else %}
                             <img src="{% static 'img/hab_individual.jpg' %}" alt="Imagen por defecto" class="card-img-top img-fluid" style="height: 220px; object-fit: cover; cursor: pointer;" data-bs-toggle="modal" data-bs-target="#imageModal" data-img-url="{% static 'img/hab_individual.jpg' %}" data-img-title="Habitación Estándar">
                         {% endif %}
