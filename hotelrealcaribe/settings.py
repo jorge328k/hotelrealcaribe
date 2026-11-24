@@ -191,6 +191,11 @@ EMAIL_HOST_USER = 'itachibeyz328@gmail.com'
 EMAIL_HOST_PASSWORD = 'bzvanqljqxifwqia'  # Contraseña de aplicación sin espacios
 DEFAULT_FROM_EMAIL = 'Hotel Real Caribe <itachibeyz328@gmail.com>'
 
+TRANSFERENCIA_BANCO = os.environ.get('TRANSFERENCIA_BANCO', '')
+TRANSFERENCIA_TITULAR = os.environ.get('TRANSFERENCIA_TITULAR', '')
+TRANSFERENCIA_TIPO_CUENTA = os.environ.get('TRANSFERENCIA_TIPO_CUENTA', '')
+TRANSFERENCIA_NUMERO_CUENTA = os.environ.get('TRANSFERENCIA_NUMERO_CUENTA', '')
+TRANSFERENCIA_DOCUMENTO = os.environ.get('TRANSFERENCIA_DOCUMENTO', '')
 
 import os
 MEDIA_URL = '/media/'

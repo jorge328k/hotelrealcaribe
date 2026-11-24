@@ -1,6 +1,8 @@
 import json
+import os
 from datetime import date, datetime, timedelta
 from decimal import Decimal
+from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login as auth_login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -8,10 +10,12 @@ from django.contrib import messages
 from django.core.mail import send_mail
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.db import transaction
 from django.db.models import Sum
+from django.utils.text import get_valid_filename
 from .models import (
     Habitacion, Galeria, TipoHabitacion, Hotel,
-    Huesped, Reserva, Pago, Servicio, ServicioReserva
+    Huesped, Reserva, Pago, Servicio, ServicioReserva, ComprobanteTransferencia
 )
 
 
@@ -359,6 +363,41 @@ def reservas_ad_view(request):
         accion = request.POST.get('accion')
         reserva = get_object_or_404(Reserva, id=reserva_id)
 
+        if accion in ['aprobar_comprobante', 'rechazar_comprobante']:
+            with transaction.atomic():
+                reserva = Reserva.objects.select_for_update().get(pk=reserva.pk)
+                comprobante = get_object_or_404(
+                    ComprobanteTransferencia.objects.select_for_update(),
+                    id=request.POST.get('comprobante_id'),
+                    reserva=reserva,
+                )
+                if comprobante.estado != 'PENDIENTE':
+                    messages.error(request, 'Este comprobante ya fue revisado.')
+                    return redirect('reservas_ad')
+
+                if accion == 'rechazar_comprobante':
+                    comprobante.estado = 'RECHAZADO'
+                    comprobante.save(update_fields=['estado'])
+                    messages.warning(request, f'Comprobante de la reserva #{reserva.id} rechazado.')
+                    return redirect('reservas_ad')
+
+                if reserva.estado != 'CONFIRMADA':
+                    messages.error(request, 'Solo se puede aprobar el pago de una reserva confirmada.')
+                    return redirect('reservas_ad')
+
+                if Pago.objects.filter(reserva=reserva, metodo='TRANSFERENCIA').exists():
+                    messages.error(request, 'Ya existe un pago por transferencia registrado para esta reserva.')
+                    return redirect('reservas_ad')
+                comprobante.estado = 'APROBADO'
+                comprobante.save(update_fields=['estado'])
+                Pago.objects.create(
+                    reserva=reserva,
+                    monto=comprobante.monto,
+                    metodo='TRANSFERENCIA',
+                )
+            messages.success(request, f'Transferencia de ${comprobante.monto:,.0f} COP aprobada para la reserva #{reserva.id}.')
+            return redirect('reservas_ad')
+
         correo_cliente = None
         try:
             user_obj = User.objects.filter(id=int(reserva.huesped.numero_documento)).first()
@@ -379,11 +418,8 @@ def reservas_ad_view(request):
             reserva.save()
 
             resumen = _calcular_resumen_financiero_reserva(reserva)
-            metodo = request.session.pop('temp_metodo_pago_' + str(reserva.id), 'TRANSFERENCIA')
-            monto_sesion = request.session.pop('temp_total_reserva_' + str(reserva.id), None)
-            request.session.pop('temp_abono_reserva_' + str(reserva.id), None)
-
-            monto_estimado = Decimal(str(monto_sesion)) if monto_sesion is not None else resumen['valor_total']
+            metodo = reserva.metodo_pago
+            monto_estimado = reserva.monto_total or resumen['valor_total']
             porcentaje_abono = Decimal('0.30')
             abono_requerido = (monto_estimado * porcentaje_abono).quantize(Decimal('1'))
             saldo_restante = monto_estimado - abono_requerido
@@ -424,9 +460,6 @@ Hotel Real Caribe""",
             id_res = reserva.id
             nombre_huesped = reserva.huesped.nombres if reserva.huesped else "Cliente"
 
-            request.session.pop('temp_metodo_pago_' + str(reserva.id), None)
-            request.session.pop('temp_total_reserva_' + str(reserva.id), None)
-            request.session.pop('temp_abono_reserva_' + str(reserva.id), None)
             reserva.estado = 'CANCELADA'
             reserva.save()
             reserva.delete()
@@ -454,11 +487,22 @@ Hotel Real Caribe""",
         return redirect('reservas_ad')
 
     context = {
-        'reservas': Reserva.objects.all().order_by('-creada_en'),
+        'reservas': Reserva.objects.all().select_related('huesped', 'habitacion').prefetch_related('comprobantes').order_by('-creada_en'),
         'usuarios_lista': User.objects.all(),
         'habitaciones_lista': Habitacion.objects.all(),
     }
     return render(request, 'adminstrativo/reservas_ad.html', context)
+
+
+@login_required(login_url='login')
+@user_passes_test(es_administrador, login_url='home')
+def descargar_comprobante_view(request, comprobante_id):
+    comprobante = get_object_or_404(ComprobanteTransferencia, id=comprobante_id)
+    nombre_archivo = get_valid_filename(os.path.basename(comprobante.nombre_archivo))
+    response = HttpResponse(comprobante.archivo, content_type=comprobante.tipo_archivo)
+    response['Content-Disposition'] = f'attachment; filename="{nombre_archivo}"'
+    response['X-Content-Type-Options'] = 'nosniff'
+    return response
 
 
 @login_required(login_url='login')
@@ -1052,12 +1096,11 @@ def reservas_view(request):
         hab_id = request.POST.get('habitacion')
         fecha_entrada_raw = request.POST.get('fecha_entrada')
         fecha_salida_raw = request.POST.get('fecha_salida')
-        metodo_pago = request.POST.get('metodo_pago', 'TRANSFERENCIA')
         servicios_seleccionados = request.POST.getlist('servicios_extra')
         cantidad_huespedes = int(request.POST.get('cantidad_huespedes', 1) or 1)
 
-        if metodo_pago not in ['TRANSFERENCIA', 'TARJETA']:
-            messages.error(request, 'Solo se permiten pagos por Transferencia Bancaria o Tarjeta.')
+        if request.POST.get('metodo_pago', 'TRANSFERENCIA') != 'TRANSFERENCIA':
+            messages.error(request, 'Por el momento solo se reciben pagos por transferencia bancaria.')
             return redirect('reservas')
 
         habitacion = get_object_or_404(Habitacion, id=hab_id)
@@ -1088,7 +1131,7 @@ def reservas_view(request):
             return redirect('reservas')
 
         noches = max(1, (f_salida - f_entrada).days)
-        precio_total_estadia = float(habitacion.precio) * noches
+        precio_total_estadia = Decimal(str(habitacion.precio)) * noches
 
         precios_servicios = {
             'Salón de Eventos (150000)': 150000,
@@ -1099,9 +1142,9 @@ def reservas_view(request):
         }
 
         for servicio in servicios_seleccionados:
-            precio_total_estadia += precios_servicios.get(servicio, 0)
+            precio_total_estadia += Decimal(str(precios_servicios.get(servicio, 0)))
 
-        abono_requerido = round(precio_total_estadia * 0.30)
+        abono_requerido = (precio_total_estadia * Decimal('0.30')).quantize(Decimal('1'))
 
         correo_usuario_registro = request.user.email if request.user.email else 'cliente@realcaribe.com'
 
@@ -1124,6 +1167,8 @@ def reservas_view(request):
             habitacion=habitacion,
             fecha_entrada=f_entrada,
             fecha_salida=f_salida,
+            metodo_pago='TRANSFERENCIA',
+            monto_total=precio_total_estadia,
             estado='PENDIENTE'
         )
 
@@ -1139,10 +1184,6 @@ def reservas_view(request):
                 cantidad=1
             )
 
-        request.session['temp_metodo_pago_' + str(reserva.id)] = metodo_pago
-        request.session['temp_total_reserva_' + str(reserva.id)] = precio_total_estadia
-        request.session['temp_abono_reserva_' + str(reserva.id)] = abono_requerido
-
         if correo_usuario_registro and correo_usuario_registro != 'cliente@realcaribe.com':
             try:
                 send_mail(
@@ -1151,7 +1192,7 @@ def reservas_view(request):
 
 Tu solicitud de reserva #{reserva.id} para la habitación #{habitacion.numero} ha sido registrada con éxito y se encuentra en estado PENDIENTE de revisión por parte de la administración del Hotel Real Caribe.
 
-Una vez sea aceptada, deberás abonar el 30% (${abono_requerido:,.0f} COP) mediante {metodo_pago}.
+Una vez sea aceptada, podrás transferir el abono del 30% (${abono_requerido:,.0f} COP) y subir el comprobante desde la sección Mis reservas. El pago solo se registrará cuando el hotel lo verifique.
 
 Te notificaremos tan pronto sea aceptada.
 
@@ -1165,12 +1206,115 @@ Te notificaremos tan pronto sea aceptada.
 
         messages.success(
             request,
-            f'¡Solicitud de reserva #{reserva.id} enviada por ${precio_total_estadia:,.0f} COP! Al ser aceptada deberás abonar el 30% (${abono_requerido:,.0f} COP) por {metodo_pago}.'
+            f'¡Solicitud de reserva #{reserva.id} enviada por ${precio_total_estadia:,.0f} COP! Al ser aceptada podrás transferir el abono del 30% (${abono_requerido:,.0f} COP) y cargar el comprobante.'
         )
-        return redirect('habitaciones')
+        return redirect('mis_reservas')
 
     context = {
         'habitaciones': Habitacion.objects.filter(estado='DISPONIBLE'),
         'habitacion_seleccionada': habitacion_seleccionada,
     }
     return render(request, 'reservas.html', context)
+
+
+@login_required(login_url='login')
+def mis_reservas_view(request):
+    huesped = Huesped.objects.filter(numero_documento=str(request.user.id)).first()
+    reservas_cliente = []
+    if huesped:
+        reservas_cliente = list(
+            Reserva.objects.filter(huesped=huesped)
+            .select_related('habitacion', 'habitacion__tipo_habitacion')
+            .prefetch_related('comprobantes', 'pagos', 'servicios_asociados__servicio')
+            .order_by('-creada_en')
+        )
+
+    for reserva in reservas_cliente:
+        total = reserva.monto_total or _calcular_resumen_financiero_reserva(reserva)['valor_total']
+        reserva.total_reserva = total
+        reserva.abono_requerido = (total * Decimal('0.30')).quantize(Decimal('1'))
+        reserva.ultimo_comprobante = reserva.comprobantes.first()
+        reserva.pago_transferencia_registrado = reserva.pagos.filter(metodo='TRANSFERENCIA').exists()
+        reserva.puede_subir_comprobante = (
+            reserva.estado == 'CONFIRMADA'
+            and reserva.metodo_pago == 'TRANSFERENCIA'
+            and not reserva.pago_transferencia_registrado
+            and (
+                reserva.ultimo_comprobante is None
+                or reserva.ultimo_comprobante.estado == 'RECHAZADO'
+            )
+        )
+
+    return render(request, 'mis_reservas.html', {
+        'reservas': reservas_cliente,
+        'transferencia_banco': settings.TRANSFERENCIA_BANCO,
+        'transferencia_titular': settings.TRANSFERENCIA_TITULAR,
+        'transferencia_tipo_cuenta': settings.TRANSFERENCIA_TIPO_CUENTA,
+        'transferencia_numero_cuenta': settings.TRANSFERENCIA_NUMERO_CUENTA,
+        'transferencia_documento': settings.TRANSFERENCIA_DOCUMENTO,
+        'datos_transferencia_configurados': all([
+            settings.TRANSFERENCIA_BANCO,
+            settings.TRANSFERENCIA_TITULAR,
+            settings.TRANSFERENCIA_TIPO_CUENTA,
+            settings.TRANSFERENCIA_NUMERO_CUENTA,
+        ]),
+    })
+
+
+@login_required(login_url='login')
+def subir_comprobante_view(request, reserva_id):
+    if request.method != 'POST':
+        return redirect('mis_reservas')
+
+    archivo = request.FILES.get('comprobante')
+    if not archivo:
+        messages.error(request, 'Selecciona el comprobante de la transferencia.')
+        return redirect('mis_reservas')
+
+    if archivo.size > 5 * 1024 * 1024:
+        messages.error(request, 'El comprobante no puede superar los 5 MB.')
+        return redirect('mis_reservas')
+
+    contenido = archivo.read()
+    extension = os.path.splitext(archivo.name)[1].lower()
+    tipos_validos = {
+        '.pdf': ('application/pdf', contenido.startswith(b'%PDF-')),
+        '.jpg': ('image/jpeg', contenido.startswith(b'\xff\xd8\xff')),
+        '.jpeg': ('image/jpeg', contenido.startswith(b'\xff\xd8\xff')),
+        '.png': ('image/png', contenido.startswith(b'\x89PNG\r\n\x1a\n')),
+        '.webp': ('image/webp', contenido.startswith(b'RIFF') and contenido[8:12] == b'WEBP'),
+    }
+    tipo_archivo, contenido_valido = tipos_validos.get(extension, ('', False))
+    if not contenido_valido:
+        messages.error(request, 'El comprobante debe ser un PDF o una imagen JPG, PNG o WEBP válida.')
+        return redirect('mis_reservas')
+
+    with transaction.atomic():
+        reserva = get_object_or_404(
+            Reserva.objects.select_for_update(),
+            id=reserva_id,
+            huesped__numero_documento=str(request.user.id),
+        )
+        if reserva.estado != 'CONFIRMADA' or reserva.metodo_pago != 'TRANSFERENCIA':
+            messages.error(request, 'Solo puedes subir comprobantes de reservas confirmadas con transferencia.')
+            return redirect('mis_reservas')
+
+        if Pago.objects.filter(reserva=reserva, metodo='TRANSFERENCIA').exists():
+            messages.error(request, 'Esta reserva ya tiene un pago por transferencia registrado.')
+            return redirect('mis_reservas')
+
+        if reserva.comprobantes.filter(estado='PENDIENTE').exists():
+            messages.error(request, 'Ya hay un comprobante pendiente de revisión para esta reserva.')
+            return redirect('mis_reservas')
+
+        total = reserva.monto_total or _calcular_resumen_financiero_reserva(reserva)['valor_total']
+        monto = (total * Decimal('0.30')).quantize(Decimal('1'))
+        ComprobanteTransferencia.objects.create(
+            reserva=reserva,
+            monto=monto,
+            archivo=contenido,
+            nombre_archivo=get_valid_filename(os.path.basename(archivo.name))[:255],
+            tipo_archivo=tipo_archivo,
+        )
+    messages.success(request, f'Comprobante recibido para la reserva #{reserva.id}. El pago quedará pendiente hasta que administración lo revise.')
+    return redirect('mis_reservas')

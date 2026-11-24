@@ -22,6 +22,7 @@
                     <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">HOME</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'home' %}#nosotros">NOSOTROS</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'habitaciones' %}">HABITACIONES</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'mis_reservas' %}">MIS RESERVAS</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'galeria' %}">GALERÍA</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'contactanos' %}">CONTÁCTENOS</a></li>
                 </ul>
@@ -113,22 +114,9 @@
                     </div>
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">Método de Pago</label>
-                    <select class="form-select" id="selectMetodoPago" name="metodo_pago" required>
-                        <option value="" disabled selected>-- Selecciona un método de pago --</option>
-                        <option value="TRANSFERENCIA">Transferencia Bancaria</option>
-                        <option value="TARJETA">Tarjeta</option>
-                    </select>
-                    <div class="form-text small text-muted">
-                        Cuando la administración acepte tu reserva, deberás realizar un abono del 30% por el método elegido.
-                    </div>
-                </div>
-
-                <div class="mb-3 d-none" id="contenedorNumeroTarjeta">
-                    <label class="form-label fw-semibold text-primary"><i class="fa-solid fa-credit-card me-2"></i>Número de Tarjeta</label>
-                    <input type="text" inputmode="numeric" class="form-control" id="numeroTarjeta" name="numero_tarjeta" placeholder="1234 5678 9012 3456" maxlength="19">
-                    <div class="form-text small text-muted">Introduce los 16 dígitos de tu tarjeta de crédito o débito.</div>
+                <input type="hidden" name="metodo_pago" value="TRANSFERENCIA">
+                <div class="alert alert-info small">
+                    Elige transferencia bancaria. Cuando administración acepte la solicitud, verás los datos bancarios y podrás subir el comprobante en <strong>Mis reservas</strong>. El pago no se registra hasta que el hotel lo verifique.
                 </div>
 
                 <div class="d-grid mt-4">
@@ -217,25 +205,6 @@
 
         window.addEventListener('DOMContentLoaded', calcularTotal);
 
-        const selectMetodoPago = document.getElementById('selectMetodoPago');
-        const contenedorNumeroTarjeta = document.getElementById('contenedorNumeroTarjeta');
-        const inputNumeroTarjeta = document.getElementById('numeroTarjeta');
-
-        selectMetodoPago.addEventListener('change', function() {
-            if (this.value === 'TARJETA') {
-                contenedorNumeroTarjeta.classList.remove('d-none');
-                inputNumeroTarjeta.setAttribute('required', 'required');
-            } else {
-                contenedorNumeroTarjeta.classList.add('d-none');
-                inputNumeroTarjeta.removeAttribute('required');
-                inputNumeroTarjeta.value = '';
-            }
-        });
-
-        inputNumeroTarjeta.addEventListener('input', function() {
-            let digitos = this.value.replace(/[^0-9]/g, '').slice(0, 16);
-            this.value = digitos.replace(/(.{4})/g, '$1 ').trim();
-        });
     </script>
 </body>
 </html>

@@ -11,6 +11,8 @@ urlpatterns = [
     path('galeria/', views.galeria_view, name='galeria'),
     path('registro/', views.registro_view, name='registro'),
     path('reservas/', views.reservas_view, name='reservas'),
+    path('mis-reservas/', views.mis_reservas_view, name='mis_reservas'),
+    path('mis-reservas/<int:reserva_id>/comprobante/', views.subir_comprobante_view, name='subir_comprobante'),
 
     # --- MÓDULO DE ADMINISTRACIÓN GENERAL ---
     path('galeria/administrar/', views.galeria_ad_view, name='galeria_ad'),
@@ -22,6 +24,7 @@ urlpatterns = [
     path('administracion/habitaciones/eliminar/<int:hab_id>/', views.eliminar_habitacion_view, name='eliminar_habitacion'),
     path('administracion/servicios/', views.servicios_ad_view, name='servicios_ad'),
     path('administracion/reservas/', views.reservas_ad_view, name='reservas_ad'),
+    path('administracion/comprobantes/<int:comprobante_id>/', views.descargar_comprobante_view, name='descargar_comprobante'),
     path('administracion/reservas/crear/', views.crear_reserva_ad_view, name='crear_reserva_ad'),
     path('administracion/pagos/', views.pagos_ad_view, name='pagos_ad'),
     path('administracion/pagos/editar/<int:pago_id>/', views.editar_pago_view, name='editar_pago'),

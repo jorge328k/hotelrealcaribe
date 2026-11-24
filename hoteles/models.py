@@ -94,6 +94,8 @@ class Reserva(models.Model):
     habitacion = models.ForeignKey(Habitacion, on_delete=models.CASCADE)
     fecha_entrada = models.DateField()
     fecha_salida = models.DateField()
+    metodo_pago = models.CharField(max_length=20, default='TRANSFERENCIA')
+    monto_total = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     estado = models.CharField(max_length=20, choices=ESTADOS_RESERVA, default='PENDIENTE')
     creada_en = models.DateTimeField(auto_now_add=True)
 
@@ -129,6 +131,33 @@ class Pago(models.Model):
 
     def __str__(self):
         return f"Pago de ${self.monto} - Reserva #{self.reserva.id}"
+
+
+class ComprobanteTransferencia(models.Model):
+    ESTADOS = [
+        ('PENDIENTE', 'Pendiente de revisión'),
+        ('APROBADO', 'Aprobado'),
+        ('RECHAZADO', 'Rechazado'),
+    ]
+
+    reserva = models.ForeignKey(
+        Reserva,
+        on_delete=models.CASCADE,
+        related_name='comprobantes',
+    )
+    monto = models.DecimalField(max_digits=12, decimal_places=2)
+    archivo = models.BinaryField()
+    nombre_archivo = models.CharField(max_length=255)
+    tipo_archivo = models.CharField(max_length=50)
+    estado = models.CharField(max_length=20, choices=ESTADOS, default='PENDIENTE')
+    creado_en = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-creado_en']
+
+    def __str__(self):
+        return f"Comprobante de reserva #{self.reserva_id} ({self.estado})"
+
 
 class Galeria(models.Model):
     titulo = models.CharField(max_length=100, blank=True, null=True, verbose_name="Título")

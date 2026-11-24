@@ -103,6 +103,10 @@
                                                 <span class="badge bg-warning text-dark">Pendiente</span>
                                             {% elif res.estado == 'CONFIRMADA' %}
                                                 <span class="badge bg-success">Confirmada</span>
+                                            {% elif res.estado == 'EN_ESTANCIA' %}
+                                                <span class="badge bg-info text-dark">En estancia</span>
+                                            {% elif res.estado == 'FINALIZADA' %}
+                                                <span class="badge bg-secondary">Finalizada</span>
                                             {% else %}
                                                 <span class="badge bg-danger">Cancelada</span>
                                             {% endif %}
@@ -112,7 +116,7 @@
                                                 {% csrf_token %}
                                                 <input type="hidden" name="reserva_id" value="{{ res.id }}">
                                                 {% if res.estado == 'PENDIENTE' %}
-                                                    <button type="submit" name="accion" value="aceptar" class="btn btn-sm btn-success text-white" title="Aceptar Reserva y Registrar Pago">
+                                                    <button type="submit" name="accion" value="aceptar" class="btn btn-sm btn-success text-white" title="Aceptar solicitud de reserva">
                                                         <i class="fa-solid fa-check"></i>
                                                     </button>
                                                     <button type="submit" name="accion" value="cancelar" class="btn btn-sm btn-danger text-white" title="Cancelar Reserva">
@@ -122,6 +126,20 @@
                                                     <span class="text-muted small fw-semibold">Procesada</span>
                                                 {% endif %}
                                             </form>
+                                            {% for comprobante in res.comprobantes.all %}
+                                                <div class="mt-2 small">
+                                                    <a href="{% url 'descargar_comprobante' comprobante.id %}">Comprobante ({{ comprobante.get_estado_display }})</a>
+                                                    {% if comprobante.estado == 'PENDIENTE' %}
+                                                        <form method="POST" class="d-inline">
+                                                            {% csrf_token %}
+                                                            <input type="hidden" name="reserva_id" value="{{ res.id }}">
+                                                            <input type="hidden" name="comprobante_id" value="{{ comprobante.id }}">
+                                                            <button type="submit" name="accion" value="aprobar_comprobante" class="btn btn-sm btn-outline-success">Aprobar pago</button>
+                                                            <button type="submit" name="accion" value="rechazar_comprobante" class="btn btn-sm btn-outline-danger">Rechazar</button>
+                                                        </form>
+                                                    {% endif %}
+                                                </div>
+                                            {% endfor %}
                                         </td>
                                     </tr>
                                     {% endfor %}

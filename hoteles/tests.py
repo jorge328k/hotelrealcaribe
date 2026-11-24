@@ -1,6 +1,15 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
-from .models import Hotel
+from django.core.files.uploadedfile import SimpleUploadedFile
+from .models import (
+    ComprobanteTransferencia,
+    Habitacion,
+    Hotel,
+    Huesped,
+    Pago,
+    Reserva,
+    TipoHabitacion,
+)
 
 
 class HotelModelTest(TestCase):
@@ -61,3 +70,89 @@ class RegistrationAndLoginTest(TestCase):
 
         self.assertRedirects(response, '/registro/')
         self.assertEqual(User.objects.filter(username__iexact='cliente').count(), 1)
+
+
+class TransferProofWorkflowTest(TestCase):
+    def setUp(self):
+        hotel = Hotel.objects.create(
+            nombre='Hotel de prueba',
+            descripcion='Hotel de prueba',
+            telefono='3001234567',
+            correo='prueba@example.com',
+        )
+        tipo = TipoHabitacion.objects.create(nombre='Doble', precio_base=100000)
+        habitacion = Habitacion.objects.create(
+            hotel=hotel,
+            numero='101',
+            piso=1,
+            tipo_habitacion=tipo,
+            capacidad=2,
+            precio=100000,
+        )
+        self.cliente = User.objects.create_user(
+            username='cliente_transferencia',
+            password='clave-segura-123',
+        )
+        huesped = Huesped.objects.create(
+            numero_documento=str(self.cliente.id),
+            nombres='Cliente',
+            apellidos='Prueba',
+            telefono='3001234567',
+            correo='cliente@example.com',
+        )
+        self.reserva = Reserva.objects.create(
+            huesped=huesped,
+            habitacion=habitacion,
+            fecha_entrada='2026-12-01',
+            fecha_salida='2026-12-02',
+            estado='CONFIRMADA',
+            metodo_pago='TRANSFERENCIA',
+            monto_total=100000,
+        )
+
+    def test_upload_waits_for_admin_approval_before_recording_payment(self):
+        self.client.force_login(self.cliente)
+        response = self.client.get('/mis-reservas/')
+        self.assertEqual(response.status_code, 200)
+
+        archivo = SimpleUploadedFile(
+            'comprobante.pdf',
+            b'%PDF-1.4 prueba',
+            content_type='application/pdf',
+        )
+        response = self.client.post(
+            f'/mis-reservas/{self.reserva.id}/comprobante/',
+            {'comprobante': archivo},
+        )
+
+        self.assertRedirects(response, '/mis-reservas/')
+        comprobante = ComprobanteTransferencia.objects.get(reserva=self.reserva)
+        self.assertEqual(comprobante.estado, 'PENDIENTE')
+        self.assertEqual(comprobante.monto, 30000)
+        self.assertFalse(Pago.objects.filter(reserva=self.reserva).exists())
+        response = self.client.get('/mis-reservas/')
+        self.assertContains(response, 'Comprobante recibido')
+
+        administrador = User.objects.create_user(
+            username='admin_transferencia',
+            password='clave-segura-123',
+            is_staff=True,
+        )
+        self.client.force_login(administrador)
+        response = self.client.post('/administracion/reservas/', {
+            'reserva_id': self.reserva.id,
+            'comprobante_id': comprobante.id,
+            'accion': 'aprobar_comprobante',
+        })
+
+        self.assertRedirects(response, '/administracion/reservas/')
+        comprobante.refresh_from_db()
+        self.assertEqual(comprobante.estado, 'APROBADO')
+        pago = Pago.objects.get(reserva=self.reserva)
+        self.assertEqual(pago.monto, 30000)
+        self.assertEqual(pago.metodo, 'TRANSFERENCIA')
+
+        self.client.force_login(administrador)
+        response = self.client.get(f'/administracion/comprobantes/{comprobante.id}/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, b'%PDF-1.4 prueba')
