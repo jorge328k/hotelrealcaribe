@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
 from pathlib import Path
+from django.core.exceptions import ImproperlyConfigured
 from django.core.management.utils import get_random_secret_key
 import os
 import dj_database_url
@@ -85,13 +86,31 @@ WSGI_APPLICATION = 'hotelrealcaribe.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
-if DEBUG:
+if RENDER_EXTERNAL_HOSTNAME:
+    DATABASE_URL = os.environ.get("DATABASE_URL")
+    if not DATABASE_URL:
+        raise ImproperlyConfigured(
+            "Configura DATABASE_URL con tu PostgreSQL externo en Render."
+        )
+
+    DATABASES = {
+        'default': dj_database_url.parse(
+            DATABASE_URL,
+            conn_max_age=600,
+            ssl_require=True,
+        )
+    }
+    if DATABASES['default']['ENGINE'] != 'django.db.backends.postgresql':
+        raise ImproperlyConfigured(
+            "DATABASE_URL en Render debe apuntar a una base PostgreSQL persistente."
+        )
+elif DEBUG:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
             'NAME': 'syshsena_db',
             'USER': 'root',
-            'PASSWORD': 'Sena101', 
+            'PASSWORD': 'Sena101',
             'HOST': 'localhost',
             'PORT': '3306',
             'OPTIONS': {
@@ -100,9 +119,22 @@ if DEBUG:
         }
     }
 else:
-    DATABASES = {
-    'default': dj_database_url.config(default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",conn_max_age=600, ssl_require=not DEBUG)
-}
+    DATABASE_URL = os.environ.get('DATABASE_URL')
+    if DATABASE_URL:
+        DATABASES = {
+            'default': dj_database_url.parse(
+                DATABASE_URL,
+                conn_max_age=600,
+                ssl_require=True,
+            )
+        }
+    else:
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': BASE_DIR / 'db.sqlite3',
+            }
+        }
 # Password validation
 # https://docs.djangoproject.com/en/6.1/ref/settings/#auth-password-validators
 

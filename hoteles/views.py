@@ -1,4 +1,3 @@
-import random
 import json
 from datetime import date, datetime, timedelta
 from decimal import Decimal
@@ -111,19 +110,26 @@ def habitaciones(request):
 
 def login_view(request):
     if request.method == 'POST':
-        usuario = request.POST.get('username')
+        identificador = request.POST.get('username', '').strip()
         clave = request.POST.get('password')
+        usuario = User.objects.filter(username__iexact=identificador).first()
+        if usuario is None:
+            usuario = User.objects.filter(email__iexact=identificador).first()
 
-        user = authenticate(request, username=usuario, password=clave)
+        user = None
+        if usuario is not None:
+            user = authenticate(
+                request,
+                username=usuario.get_username(),
+                password=clave,
+            )
 
         if user is not None:
             auth_login(request, user)
             if user.is_staff or user.is_superuser:
                 return redirect('dashboard')
-            else:
-                return redirect('home')
-        else:
-            messages.error(request, 'Usuario o contraseña incorrectos.')
+            return redirect('home')
+        messages.error(request, 'Usuario/correo o contrase?a incorrectos.')
 
     return render(request, 'login.html')
 
@@ -135,74 +141,27 @@ def logout_view(request):
 
 def registro_view(request):
     if request.method == 'POST':
-        username = request.POST.get('username')
-        email = request.POST.get('email')
+        username = request.POST.get('username', '').strip()
+        email = request.POST.get('email', '').strip()
         password = request.POST.get('password')
 
-        if User.objects.filter(username=username).exists():
-            messages.error(request, 'El nombre de usuario ya está en uso.')
+        if not username or not email or not password:
+            messages.error(request, 'Completa el usuario, correo y contrase?a.')
             return redirect('registro')
 
-        if User.objects.filter(email=email).exists():
-            messages.error(request, 'Ya existe una cuenta registrada con este correo electrónico.')
+        if User.objects.filter(username__iexact=username).exists():
+            messages.error(request, 'El nombre de usuario ya est? en uso.')
             return redirect('registro')
 
-        codigo_verificacion = str(random.randint(100000, 999999))
-
-        request.session['registro_temp'] = {
-            'username': username,
-            'email': email,
-            'password': password,
-            'codigo': codigo_verificacion
-        }
-
-        asunto = "Código de verificación - SysHSENA (Hotel Real Caribe)"
-        mensaje = f"""
-        Hola,
-        Has solicitado crear una cuenta en SysHSENA (Hotel Real Caribe).
-        Tu código de verificación es: {codigo_verificacion}
-        """
-
-        try:
-            send_mail(
-                subject=asunto,
-                message=mensaje,
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[email],
-                fail_silently=False,
-            )
-            messages.success(request, '¡Código de verificación enviado a tu correo electrónico!')
-            return redirect('verificar_codigo')
-        except Exception:
-            messages.error(request, 'Error al enviar el correo de verificación. Inténtalo de nuevo.')
+        if User.objects.filter(email__iexact=email).exists():
+            messages.error(request, 'Ya existe una cuenta registrada con este correo electr?nico.')
             return redirect('registro')
+
+        User.objects.create_user(username=username, email=email, password=password)
+        messages.success(request, '?Cuenta creada! Ya puedes iniciar sesi?n con tu usuario o correo.')
+        return redirect('login')
 
     return render(request, 'registro.html')
-
-
-def verificar_codigo_view(request):
-    datos_temp = request.session.get('registro_temp')
-
-    if not datos_temp:
-        messages.error(request, 'No hay ningún proceso de registro activo.')
-        return redirect('registro')
-
-    if request.method == 'POST':
-        codigo_ingresado = request.POST.get('codigo')
-
-        if codigo_ingresado == datos_temp['codigo']:
-            User.objects.create_user(
-                username=datos_temp['username'],
-                email=datos_temp['email'],
-                password=datos_temp['password']
-            )
-            del request.session['registro_temp']
-            messages.success(request, '¡Cuenta creada y verificada con éxito! Ya puedes iniciar sesión.')
-            return redirect('login')
-        else:
-            messages.error(request, 'Código de verificación incorrecto. Inténtalo de nuevo.')
-
-    return render(request, 'verificar_codigo.html')
 
 
 def contactanos_view(request):

@@ -10,7 +10,6 @@ urlpatterns = [
     path('contactanos/', views.contactanos_view, name='contactanos'),
     path('galeria/', views.galeria_view, name='galeria'),
     path('registro/', views.registro_view, name='registro'),
-    path('verificar-codigo/', views.verificar_codigo_view, name='verificar_codigo'),
     path('reservas/', views.reservas_view, name='reservas'),
 
     # --- MÓDULO DE ADMINISTRACIÓN GENERAL ---
