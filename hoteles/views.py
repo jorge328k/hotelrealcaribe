@@ -435,7 +435,7 @@ def reservas_ad_view(request):
             )
             messages.success(
                 request,
-                f'¡Reserva #{reserva.id} confirmada! Total: ${float(monto_estimado):,.0f} COP. {mensaje_pago}'
+                f'¡Reserva #{reserva.id} confirmada! El total de la estadía es ${float(monto_estimado):,.0f} COP; todavía no hay pagos registrados. {mensaje_pago}'
             )
 
             if correo_cliente:

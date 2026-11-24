@@ -179,3 +179,31 @@ class TransferProofWorkflowTest(TestCase):
         reserva_tarjeta.save(update_fields=['estado'])
         response = self.client.get('/mis-reservas/')
         self.assertContains(response, 'pago con tarjeta en línea no está habilitado')
+
+    def test_accepting_reservation_does_not_register_any_payment(self):
+        reserva_pendiente = Reserva.objects.create(
+            huesped=self.reserva.huesped,
+            habitacion=self.reserva.habitacion,
+            fecha_entrada=date.today() + timedelta(days=5),
+            fecha_salida=date.today() + timedelta(days=6),
+            estado='PENDIENTE',
+            metodo_pago='TRANSFERENCIA',
+            monto_total=100000,
+        )
+        administrador = User.objects.create_user(
+            username='admin_aceptar_reserva',
+            password='clave-segura-123',
+            is_staff=True,
+        )
+        self.client.force_login(administrador)
+
+        response = self.client.post('/administracion/reservas/', {
+            'reserva_id': reserva_pendiente.id,
+            'accion': 'aceptar',
+        }, follow=True)
+
+        self.assertEqual(response.status_code, 200)
+        reserva_pendiente.refresh_from_db()
+        self.assertEqual(reserva_pendiente.estado, 'CONFIRMADA')
+        self.assertFalse(Pago.objects.filter(reserva=reserva_pendiente).exists())
+        self.assertContains(response, 'todavía no hay pagos registrados')
