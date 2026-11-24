@@ -1,0 +1,670 @@
+[
+{
+  "model": "auth.user",
+  "pk": 2,
+  "fields": {
+    "password": "pbkdf2_sha256$1500000$cv2qoiR0jCgUF3YFYSxdIR$cTgsD/SJp/8pt691kiixs4aK9fazmHNynjABkyyH5kU=",
+    "last_login": "2026-11-20T13:22:41.847Z",
+    "is_superuser": true,
+    "username": "andrew",
+    "first_name": "",
+    "last_name": "",
+    "email": "jorgeandresramosguale@gmail.com",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-10-02T16:46:59.166Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 3,
+  "fields": {
+    "password": "pbkdf2_sha256$1500000$pZybiujPXD6WYosTDPPNf4$3pLvrEgkCDgBTm3FteU30b7idBJkDLOCNtXgv4tnXI0=",
+    "last_login": "2026-11-18T12:23:46.723Z",
+    "is_superuser": true,
+    "username": "admin77",
+    "first_name": "",
+    "last_name": "",
+    "email": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-10-07T18:05:50.912Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 4,
+  "fields": {
+    "password": "pbkdf2_sha256$1500000$xAIyhdkdHf6OEVzlShnJpM$Ax8rvArfYkflVr6fV2+BUkAJPxe56VguiumKdvYHOPw=",
+    "last_login": "2026-11-20T17:13:02.996Z",
+    "is_superuser": true,
+    "username": "jorge",
+    "first_name": "",
+    "last_name": "",
+    "email": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-10-15T17:10:04.053Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 5,
+  "fields": {
+    "password": "pbkdf2_sha256$1500000$MWICFPC2kCuo7keHJ3ALvE$cTy02/yvSYqu/Fwee9ccdaNANhLTBt4mb85m7O9qmmo=",
+    "last_login": "2026-11-03T13:48:40.584Z",
+    "is_superuser": false,
+    "username": "ernesto",
+    "first_name": "",
+    "last_name": "",
+    "email": "ernestonicolasmovilgamez@gmail.com",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-10-21T12:35:45.516Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 6,
+  "fields": {
+    "password": "pbkdf2_sha256$1500000$8FjQe705y6ADBKH9YoE5Cr$NNbiPen6Xx+gFTjcZB4R4MX2NntQFB3MJ5b0VCJhz8w=",
+    "last_login": "2026-10-30T13:45:20.605Z",
+    "is_superuser": false,
+    "username": "moises",
+    "first_name": "",
+    "last_name": "",
+    "email": "moisesgamez911@gmail.com",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-10-21T14:59:02.909Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 7,
+  "fields": {
+    "password": "pbkdf2_sha256$1500000$TXWURriw98l803tsW7uBDI$M1sHyM1ve5aPhJ1ArtS0MsotEu43cgZp3p2GX5/oFcA=",
+    "last_login": "2026-10-28T17:42:42.168Z",
+    "is_superuser": false,
+    "username": "johan",
+    "first_name": "",
+    "last_name": "",
+    "email": "jhoanortizs27@gmail.com",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-10-28T17:42:21.152Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 8,
+  "fields": {
+    "password": "pbkdf2_sha256$1500000$KHS19ItmC6sZoKYjOfAtHJ$4m7paB+/s1i3XVmsaLzlygS8BqM4GDxyUwFkPqyw76k=",
+    "last_login": "2026-11-18T14:56:18.122Z",
+    "is_superuser": false,
+    "username": "goku",
+    "first_name": "",
+    "last_name": "",
+    "email": "gb142572@gmail.com",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-11-18T13:51:16.203Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "hoteles.hotel",
+  "pk": 1,
+  "fields": {
+    "nombre": "Hotel Real Caribe",
+    "descripcion": "",
+    "direccion": "Calle 12 #7-45",
+    "municipio": "Riohacha",
+    "telefono": "",
+    "correo": ""
+  }
+},
+{
+  "model": "hoteles.tipohabitacion",
+  "pk": 1,
+  "fields": {
+    "nombre": "Individual",
+    "descripcion": "Habitación para una persona",
+    "precio_base": "80000.00"
+  }
+},
+{
+  "model": "hoteles.tipohabitacion",
+  "pk": 2,
+  "fields": {
+    "nombre": "Doble",
+    "descripcion": "Habitación para dos personas",
+    "precio_base": "120000.00"
+  }
+},
+{
+  "model": "hoteles.tipohabitacion",
+  "pk": 3,
+  "fields": {
+    "nombre": "familiar",
+    "descripcion": "Acomodación familiar para grupos grandes o delegaciones.",
+    "precio_base": "200000.00"
+  }
+},
+{
+  "model": "hoteles.habitacion",
+  "pk": 1,
+  "fields": {
+    "hotel": 1,
+    "numero": "101",
+    "piso": 4,
+    "tipo_habitacion": 2,
+    "capacidad": 2,
+    "precio": "120000.00",
+    "estado": "DISPONIBLE",
+    "imagen": "habitaciones/hab_doble_4EvU9PM.jpg",
+    "descripcion": "None",
+    "modalidad": "DIA"
+  }
+},
+{
+  "model": "hoteles.habitacion",
+  "pk": 2,
+  "fields": {
+    "hotel": 1,
+    "numero": "102",
+    "piso": 2,
+    "tipo_habitacion": 1,
+    "capacidad": 1,
+    "precio": "80000.00",
+    "estado": "DISPONIBLE",
+    "imagen": "habitaciones/hab_individual.jpg",
+    "descripcion": null,
+    "modalidad": "NOCHE"
+  }
+},
+{
+  "model": "hoteles.habitacion",
+  "pk": 3,
+  "fields": {
+    "hotel": 1,
+    "numero": "105",
+    "piso": 1,
+    "tipo_habitacion": 3,
+    "capacidad": 6,
+    "precio": "200000.00",
+    "estado": "DISPONIBLE",
+    "imagen": "habitaciones/hab_multiple.jpg",
+    "descripcion": null,
+    "modalidad": "NOCHE"
+  }
+},
+{
+  "model": "hoteles.habitacion",
+  "pk": 4,
+  "fields": {
+    "hotel": 1,
+    "numero": "104",
+    "piso": 2,
+    "tipo_habitacion": 1,
+    "capacidad": 2,
+    "precio": "80000.00",
+    "estado": "DISPONIBLE",
+    "imagen": "habitaciones/hab_individual_5TutGgS.jpg",
+    "descripcion": null,
+    "modalidad": "NOCHE"
+  }
+},
+{
+  "model": "hoteles.habitacion",
+  "pk": 5,
+  "fields": {
+    "hotel": 1,
+    "numero": "106",
+    "piso": 2,
+    "tipo_habitacion": 2,
+    "capacidad": 4,
+    "precio": "120000.00",
+    "estado": "DISPONIBLE",
+    "imagen": "habitaciones/hab_doble_T2WhDkV.jpg",
+    "descripcion": null,
+    "modalidad": "NOCHE"
+  }
+},
+{
+  "model": "hoteles.habitacion",
+  "pk": 6,
+  "fields": {
+    "hotel": 1,
+    "numero": "107",
+    "piso": 3,
+    "tipo_habitacion": 1,
+    "capacidad": 3,
+    "precio": "120000.00",
+    "estado": "DISPONIBLE",
+    "imagen": "habitaciones/pexels-misbaa-eri-426041722-37748241.jpg",
+    "descripcion": null,
+    "modalidad": "NOCHE"
+  }
+},
+{
+  "model": "hoteles.habitacion",
+  "pk": 7,
+  "fields": {
+    "hotel": 1,
+    "numero": "108",
+    "piso": 2,
+    "tipo_habitacion": 2,
+    "capacidad": 4,
+    "precio": "140000.00",
+    "estado": "DISPONIBLE",
+    "imagen": "habitaciones/pexels-shaza-jocarlos-841367558-39828894.jpg",
+    "descripcion": null,
+    "modalidad": "NOCHE"
+  }
+},
+{
+  "model": "hoteles.habitacion",
+  "pk": 10,
+  "fields": {
+    "hotel": 1,
+    "numero": "103",
+    "piso": 2,
+    "tipo_habitacion": 3,
+    "capacidad": 4,
+    "precio": "250000.00",
+    "estado": "OCUPADA",
+    "imagen": "habitaciones/hab_multiple_BqgTiUa.jpg",
+    "descripcion": "Espacio confortable dotado de excelente iluminación y amenidades completas.",
+    "modalidad": "NOCHE"
+  }
+},
+{
+  "model": "hoteles.huesped",
+  "pk": 1,
+  "fields": {
+    "tipo_documento": "CC",
+    "numero_documento": "4",
+    "nombres": "jorge",
+    "apellidos": "Cliente Web",
+    "telefono": "3000000000",
+    "correo": "cliente@realcaribe.com",
+    "nacionalidad": "Colombiana"
+  }
+},
+{
+  "model": "hoteles.huesped",
+  "pk": 2,
+  "fields": {
+    "tipo_documento": "CC",
+    "numero_documento": "6",
+    "nombres": "moises",
+    "apellidos": "Cliente Web",
+    "telefono": "3000000000",
+    "correo": "moisesgamez911@gmail.com",
+    "nacionalidad": "Colombiana"
+  }
+},
+{
+  "model": "hoteles.huesped",
+  "pk": 3,
+  "fields": {
+    "tipo_documento": "CC",
+    "numero_documento": "3",
+    "nombres": "admin77",
+    "apellidos": "Cliente Web",
+    "telefono": "3000000000",
+    "correo": "jorgeandresramosguale@gmail.com",
+    "nacionalidad": "Colombiana"
+  }
+},
+{
+  "model": "hoteles.huesped",
+  "pk": 4,
+  "fields": {
+    "tipo_documento": "CC",
+    "numero_documento": "5",
+    "nombres": "ernesto",
+    "apellidos": "Cliente Web",
+    "telefono": "3000000000",
+    "correo": "ernestonicolasmovilgamez@gmail.com",
+    "nacionalidad": "Colombiana"
+  }
+},
+{
+  "model": "hoteles.huesped",
+  "pk": 5,
+  "fields": {
+    "tipo_documento": "CC",
+    "numero_documento": "115678088",
+    "nombres": "jh",
+    "apellidos": "de la cruz",
+    "telefono": "3449860867",
+    "correo": "jhdelacruz777@gmail.com",
+    "nacionalidad": "Colombiana"
+  }
+},
+{
+  "model": "hoteles.huesped",
+  "pk": 6,
+  "fields": {
+    "tipo_documento": "CC",
+    "numero_documento": "2",
+    "nombres": "andrew",
+    "apellidos": "Cliente Web",
+    "telefono": "3000000000",
+    "correo": "jorgeandresramosguale@gmail.com",
+    "nacionalidad": "Colombiana"
+  }
+},
+{
+  "model": "hoteles.reserva",
+  "pk": 1,
+  "fields": {
+    "huesped": 1,
+    "habitacion": 1,
+    "fecha_entrada": "2026-10-23",
+    "fecha_salida": "2026-10-26",
+    "estado": "CANCELADA",
+    "creada_en": "2026-10-23T12:31:56.309Z"
+  }
+},
+{
+  "model": "hoteles.reserva",
+  "pk": 2,
+  "fields": {
+    "huesped": 2,
+    "habitacion": 2,
+    "fecha_entrada": "2026-10-23",
+    "fecha_salida": "2026-10-26",
+    "estado": "FINALIZADA",
+    "creada_en": "2026-10-23T13:09:43.722Z"
+  }
+},
+{
+  "model": "hoteles.reserva",
+  "pk": 3,
+  "fields": {
+    "huesped": 3,
+    "habitacion": 2,
+    "fecha_entrada": "2026-10-30",
+    "fecha_salida": "2026-12-10",
+    "estado": "FINALIZADA",
+    "creada_en": "2026-10-28T16:35:55.063Z"
+  }
+},
+{
+  "model": "hoteles.reserva",
+  "pk": 4,
+  "fields": {
+    "huesped": 3,
+    "habitacion": 2,
+    "fecha_entrada": "2026-10-31",
+    "fecha_salida": "2026-11-06",
+    "estado": "FINALIZADA",
+    "creada_en": "2026-10-28T16:41:20.775Z"
+  }
+},
+{
+  "model": "hoteles.reserva",
+  "pk": 6,
+  "fields": {
+    "huesped": 3,
+    "habitacion": 3,
+    "fecha_entrada": "2026-10-30",
+    "fecha_salida": "2026-11-06",
+    "estado": "FINALIZADA",
+    "creada_en": "2026-10-28T16:57:59.720Z"
+  }
+},
+{
+  "model": "hoteles.reserva",
+  "pk": 7,
+  "fields": {
+    "huesped": 4,
+    "habitacion": 7,
+    "fecha_entrada": "2026-11-04",
+    "fecha_salida": "2026-11-09",
+    "estado": "FINALIZADA",
+    "creada_en": "2026-11-03T13:49:32.369Z"
+  }
+},
+{
+  "model": "hoteles.reserva",
+  "pk": 8,
+  "fields": {
+    "huesped": 3,
+    "habitacion": 1,
+    "fecha_entrada": "2026-11-17",
+    "fecha_salida": "2026-11-18",
+    "estado": "FINALIZADA",
+    "creada_en": "2026-11-17T17:02:55.880Z"
+  }
+},
+{
+  "model": "hoteles.reserva",
+  "pk": 9,
+  "fields": {
+    "huesped": 1,
+    "habitacion": 2,
+    "fecha_entrada": "2026-11-18",
+    "fecha_salida": "2026-11-19",
+    "estado": "FINALIZADA",
+    "creada_en": "2026-11-18T13:38:31.131Z"
+  }
+},
+{
+  "model": "hoteles.reserva",
+  "pk": 16,
+  "fields": {
+    "huesped": 6,
+    "habitacion": 2,
+    "fecha_entrada": "2026-11-20",
+    "fecha_salida": "2026-11-21",
+    "estado": "FINALIZADA",
+    "creada_en": "2026-11-20T12:21:34.451Z"
+  }
+},
+{
+  "model": "hoteles.reserva",
+  "pk": 17,
+  "fields": {
+    "huesped": 1,
+    "habitacion": 10,
+    "fecha_entrada": "2026-11-20",
+    "fecha_salida": "2026-11-21",
+    "estado": "CONFIRMADA",
+    "creada_en": "2026-11-20T15:43:48.380Z"
+  }
+},
+{
+  "model": "hoteles.servicio",
+  "pk": 1,
+  "fields": {
+    "nombre": "Desayuno Caribeño (20000)",
+    "descripcion": null,
+    "costo": "20000.00"
+  }
+},
+{
+  "model": "hoteles.servicioreserva",
+  "pk": 1,
+  "fields": {
+    "reserva": 16,
+    "servicio": 1,
+    "cantidad": 1
+  }
+},
+{
+  "model": "hoteles.servicioreserva",
+  "pk": 2,
+  "fields": {
+    "reserva": 17,
+    "servicio": 1,
+    "cantidad": 1
+  }
+},
+{
+  "model": "hoteles.pago",
+  "pk": 2,
+  "fields": {
+    "reserva": 2,
+    "monto": "80000.00",
+    "metodo": "EFECTIVO",
+    "fecha_pago": "2026-10-23T13:10:21.923Z"
+  }
+},
+{
+  "model": "hoteles.pago",
+  "pk": 4,
+  "fields": {
+    "reserva": 4,
+    "monto": "80000.00",
+    "metodo": "EFECTIVO",
+    "fecha_pago": "2026-10-28T16:47:12.199Z"
+  }
+},
+{
+  "model": "hoteles.pago",
+  "pk": 6,
+  "fields": {
+    "reserva": 6,
+    "monto": "255000.00",
+    "metodo": "TARJETA",
+    "fecha_pago": "2026-10-28T16:58:25.975Z"
+  }
+},
+{
+  "model": "hoteles.pago",
+  "pk": 8,
+  "fields": {
+    "reserva": 8,
+    "monto": "120000.00",
+    "metodo": "EFECTIVO",
+    "fecha_pago": "2026-11-17T17:05:05.278Z"
+  }
+},
+{
+  "model": "hoteles.pago",
+  "pk": 10,
+  "fields": {
+    "reserva": 9,
+    "monto": "100000.00",
+    "metodo": "EFECTIVO",
+    "fecha_pago": "2026-11-18T13:42:46.205Z"
+  }
+},
+{
+  "model": "hoteles.pago",
+  "pk": 11,
+  "fields": {
+    "reserva": 16,
+    "monto": "100000.00",
+    "metodo": "EFECTIVO",
+    "fecha_pago": "2026-11-20T12:22:19.593Z"
+  }
+},
+{
+  "model": "hoteles.galeria",
+  "pk": 9,
+  "fields": {
+    "titulo": "muelle",
+    "imagen": "galeria/muelle_OaTOMAW.jpg",
+    "fecha_subida": "2026-10-20T12:30:18.059Z"
+  }
+},
+{
+  "model": "hoteles.galeria",
+  "pk": 10,
+  "fields": {
+    "titulo": "playa",
+    "imagen": "galeria/playas_X1zQLMW.jpg",
+    "fecha_subida": "2026-10-20T12:30:30.650Z"
+  }
+},
+{
+  "model": "hoteles.galeria",
+  "pk": 11,
+  "fields": {
+    "titulo": "riohacha",
+    "imagen": "galeria/riohacha.jpg",
+    "fecha_subida": "2026-10-20T12:30:53.842Z"
+  }
+},
+{
+  "model": "hoteles.galeria",
+  "pk": 12,
+  "fields": {
+    "titulo": "",
+    "imagen": "galeria/Parque_Hotel_interior_08.jpg",
+    "fecha_subida": "2026-10-20T16:46:31.728Z"
+  }
+},
+{
+  "model": "hoteles.galeria",
+  "pk": 13,
+  "fields": {
+    "titulo": "",
+    "imagen": "galeria/franciso.jpg",
+    "fecha_subida": "2026-10-23T15:46:02.373Z"
+  }
+},
+{
+  "model": "hoteles.galeria",
+  "pk": 14,
+  "fields": {
+    "titulo": "",
+    "imagen": "galeria/Catedral.jpg",
+    "fecha_subida": "2026-10-23T15:46:10.464Z"
+  }
+},
+{
+  "model": "hoteles.galeria",
+  "pk": 17,
+  "fields": {
+    "titulo": "",
+    "imagen": "galeria/images_7_3lHZyx7.jpg",
+    "fecha_subida": "2026-10-30T12:44:04.077Z"
+  }
+},
+{
+  "model": "hoteles.galeria",
+  "pk": 19,
+  "fields": {
+    "titulo": "",
+    "imagen": "galeria/espa_uuA4m02.jpg",
+    "fecha_subida": "2026-10-30T12:44:24.761Z"
+  }
+},
+{
+  "model": "hoteles.galeria",
+  "pk": 20,
+  "fields": {
+    "titulo": "",
+    "imagen": "galeria/famoso_TgZfufr.jpg",
+    "fecha_subida": "2026-10-30T12:45:43.296Z"
+  }
+},
+{
+  "model": "hoteles.galeria",
+  "pk": 21,
+  "fields": {
+    "titulo": "",
+    "imagen": "galeria/lugar.jpg",
+    "fecha_subida": "2026-11-20T13:04:05.275Z"
+  }
+}
+]
