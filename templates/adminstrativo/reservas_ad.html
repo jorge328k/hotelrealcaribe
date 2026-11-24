@@ -85,6 +85,7 @@
                                     <th>Habitación</th>
                                     <th>Entrada</th>
                                     <th>Salida</th>
+                                    <th>Pago elegido</th>
                                     <th>Estado</th>
                                     <th>Acciones</th>
                                 </tr>
@@ -98,6 +99,7 @@
                                         <td>Habitación #{{ res.habitacion.numero }}</td>
                                         <td>{{ res.fecha_entrada }}</td>
                                         <td>{{ res.fecha_salida }}</td>
+                                        <td>{{ res.get_metodo_pago_display }}</td>
                                         <td>
                                             {% if res.estado == 'PENDIENTE' %}
                                                 <span class="badge bg-warning text-dark">Pendiente</span>
@@ -145,7 +147,7 @@
                                     {% endfor %}
                                 {% else %}
                                     <tr>
-                                        <td colspan="7" class="text-center py-4 text-muted">No hay reservas registradas en el sistema por el momento.</td>
+                                        <td colspan="8" class="text-center py-4 text-muted">No hay reservas registradas en el sistema por el momento.</td>
                                     </tr>
                                 {% endif %}
                             </tbody>

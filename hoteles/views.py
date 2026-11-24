@@ -418,21 +418,30 @@ def reservas_ad_view(request):
             reserva.save()
 
             resumen = _calcular_resumen_financiero_reserva(reserva)
-            metodo = reserva.metodo_pago
+            metodo = reserva.get_metodo_pago_display()
             monto_estimado = reserva.monto_total or resumen['valor_total']
             porcentaje_abono = Decimal('0.30')
             abono_requerido = (monto_estimado * porcentaje_abono).quantize(Decimal('1'))
-            saldo_restante = monto_estimado - abono_requerido
+            instrucciones_pago = (
+                f'Puedes transferir el abono del 30% (${float(abono_requerido):,.0f} COP) y cargar el comprobante en Mis reservas. El pago se registrará cuando el hotel lo verifique.'
+                if reserva.metodo_pago == 'TRANSFERENCIA'
+                else 'El pago con tarjeta en línea no está habilitado. Por favor, comunícate con el hotel para coordinar el cobro.'
+            )
 
+            mensaje_pago = (
+                f'Abono requerido (30%): ${float(abono_requerido):,.0f} COP por transferencia.'
+                if reserva.metodo_pago == 'TRANSFERENCIA'
+                else 'El cliente seleccionó tarjeta; el cobro debe coordinarse directamente con el hotel.'
+            )
             messages.success(
                 request,
-                f'¡Reserva #{reserva.id} confirmada! Total: ${float(monto_estimado):,.0f} COP | Abono requerido (30%): ${float(abono_requerido):,.0f} COP por {metodo}.'
+                f'¡Reserva #{reserva.id} confirmada! Total: ${float(monto_estimado):,.0f} COP. {mensaje_pago}'
             )
 
             if correo_cliente:
                 try:
                     send_mail(
-                        subject=f"¡Reserva #{reserva.id} Aceptada! Realiza tu abono del 30% - Hotel Real Caribe",
+                        subject=f"¡Reserva #{reserva.id} Aceptada! - Hotel Real Caribe",
                         message=f"""Hola {reserva.huesped.nombres},
 
 Nos alegra informarte que tu reserva #{reserva.id} para la habitación #{reserva.habitacion.numero} ha sido ACEPTADA por administración.
@@ -441,11 +450,9 @@ Detalles de tu estadía y pago:
 - Entrada: {reserva.fecha_entrada}
 - Salida: {reserva.fecha_salida}
 - Total de la estadía: ${float(monto_estimado):,.0f} COP
-- Abono requerido (30%): ${float(abono_requerido):,.0f} COP
-- Saldo restante (70%): ${float(saldo_restante):,.0f} COP
 - Método de pago seleccionado: {metodo}
 
-Por favor realiza el abono del 30% (${float(abono_requerido):,.0f} COP) mediante {metodo} para dejar tu reserva asegurada.
+{instrucciones_pago}
 
 Atentamente,
 Hotel Real Caribe""",
@@ -1099,8 +1106,9 @@ def reservas_view(request):
         servicios_seleccionados = request.POST.getlist('servicios_extra')
         cantidad_huespedes = int(request.POST.get('cantidad_huespedes', 1) or 1)
 
-        if request.POST.get('metodo_pago', 'TRANSFERENCIA') != 'TRANSFERENCIA':
-            messages.error(request, 'Por el momento solo se reciben pagos por transferencia bancaria.')
+        metodo_pago = request.POST.get('metodo_pago', '')
+        if metodo_pago not in ['TRANSFERENCIA', 'TARJETA']:
+            messages.error(request, 'Selecciona transferencia bancaria o tarjeta.')
             return redirect('reservas')
 
         habitacion = get_object_or_404(Habitacion, id=hab_id)
@@ -1145,6 +1153,11 @@ def reservas_view(request):
             precio_total_estadia += Decimal(str(precios_servicios.get(servicio, 0)))
 
         abono_requerido = (precio_total_estadia * Decimal('0.30')).quantize(Decimal('1'))
+        instrucciones_pago = (
+            f'Una vez aceptada, podrás transferir el abono del 30% (${abono_requerido:,.0f} COP) y subir el comprobante desde Mis reservas. El pago solo se registrará cuando el hotel lo verifique.'
+            if metodo_pago == 'TRANSFERENCIA'
+            else 'El pago con tarjeta en línea no está habilitado. Cuando sea aceptada, coordina el cobro directamente con el hotel.'
+        )
 
         correo_usuario_registro = request.user.email if request.user.email else 'cliente@realcaribe.com'
 
@@ -1167,7 +1180,7 @@ def reservas_view(request):
             habitacion=habitacion,
             fecha_entrada=f_entrada,
             fecha_salida=f_salida,
-            metodo_pago='TRANSFERENCIA',
+            metodo_pago=metodo_pago,
             monto_total=precio_total_estadia,
             estado='PENDIENTE'
         )
@@ -1192,7 +1205,9 @@ def reservas_view(request):
 
 Tu solicitud de reserva #{reserva.id} para la habitación #{habitacion.numero} ha sido registrada con éxito y se encuentra en estado PENDIENTE de revisión por parte de la administración del Hotel Real Caribe.
 
-Una vez sea aceptada, podrás transferir el abono del 30% (${abono_requerido:,.0f} COP) y subir el comprobante desde la sección Mis reservas. El pago solo se registrará cuando el hotel lo verifique.
+Método elegido: {reserva.get_metodo_pago_display()}.
+
+{instrucciones_pago}
 
 Te notificaremos tan pronto sea aceptada.
 
@@ -1206,7 +1221,7 @@ Te notificaremos tan pronto sea aceptada.
 
         messages.success(
             request,
-            f'¡Solicitud de reserva #{reserva.id} enviada por ${precio_total_estadia:,.0f} COP! Al ser aceptada podrás transferir el abono del 30% (${abono_requerido:,.0f} COP) y cargar el comprobante.'
+            f'¡Solicitud de reserva #{reserva.id} enviada por ${precio_total_estadia:,.0f} COP! Método elegido: {reserva.get_metodo_pago_display()}.'
         )
         return redirect('mis_reservas')
 

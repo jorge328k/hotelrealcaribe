@@ -114,9 +114,16 @@
                     </div>
                 </div>
 
-                <input type="hidden" name="metodo_pago" value="TRANSFERENCIA">
-                <div class="alert alert-info small">
-                    Elige transferencia bancaria. Cuando administración acepte la solicitud, verás los datos bancarios y podrás subir el comprobante en <strong>Mis reservas</strong>. El pago no se registra hasta que el hotel lo verifique.
+                <div class="mb-3">
+                    <label class="form-label fw-semibold" for="selectMetodoPago">Método de pago</label>
+                    <select class="form-select" id="selectMetodoPago" name="metodo_pago" required>
+                        <option value="" selected disabled>-- Selecciona un método de pago --</option>
+                        <option value="TRANSFERENCIA">Transferencia bancaria</option>
+                        <option value="TARJETA">Tarjeta</option>
+                    </select>
+                </div>
+                <div class="alert alert-info small" id="infoMetodoPago">
+                    Si eliges transferencia, al aceptar la reserva verás los datos bancarios y podrás subir el comprobante en <strong>Mis reservas</strong>. El hotel verificará el pago.
                 </div>
 
                 <div class="d-grid mt-4">
@@ -160,6 +167,16 @@
         const textoTotal = document.getElementById('textoTotal');
         const textoAbono = document.getElementById('textoAbono');
         const textoRestante = document.getElementById('textoRestante');
+        const selectMetodoPago = document.getElementById('selectMetodoPago');
+        const infoMetodoPago = document.getElementById('infoMetodoPago');
+
+        selectMetodoPago.addEventListener('change', function() {
+            if (this.value === 'TARJETA') {
+                infoMetodoPago.innerHTML = 'Puedes seleccionar tarjeta, pero el pago en línea aún no está habilitado. Cuando se acepte la reserva, deberás coordinar el cobro directamente con el hotel. No ingreses datos de tarjeta en este sitio.';
+            } else {
+                infoMetodoPago.innerHTML = 'Si eliges transferencia, al aceptar la reserva verás los datos bancarios y podrás subir el comprobante en <strong>Mis reservas</strong>. El hotel verificará el pago.';
+            }
+        });
 
         function calcularTotal() {
             let precioPorDia = 0;

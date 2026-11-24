@@ -90,11 +90,15 @@ class Reserva(models.Model):
         ('FINALIZADA', 'Finalizada'),
         ('CANCELADA', 'Cancelada'),
     ]
+    METODOS_PAGO = [
+        ('TRANSFERENCIA', 'Transferencia bancaria'),
+        ('TARJETA', 'Tarjeta (coordinación con el hotel)'),
+    ]
     huesped = models.ForeignKey(Huesped, on_delete=models.CASCADE)
     habitacion = models.ForeignKey(Habitacion, on_delete=models.CASCADE)
     fecha_entrada = models.DateField()
     fecha_salida = models.DateField()
-    metodo_pago = models.CharField(max_length=20, default='TRANSFERENCIA')
+    metodo_pago = models.CharField(max_length=20, choices=METODOS_PAGO, default='TRANSFERENCIA')
     monto_total = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     estado = models.CharField(max_length=20, choices=ESTADOS_RESERVA, default='PENDIENTE')
     creada_en = models.DateTimeField(auto_now_add=True)

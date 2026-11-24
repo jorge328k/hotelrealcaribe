@@ -41,8 +41,10 @@
                     <p class="mb-1">Entrada: {{ reserva.fecha_entrada }} · Salida: {{ reserva.fecha_salida }}</p>
                     <p class="mb-3">Total: ${{ reserva.total_reserva|floatformat:0 }} COP</p>
 
+                    <p class="mb-3">Método de pago elegido: <strong>{{ reserva.get_metodo_pago_display }}</strong></p>
+
                     {% if reserva.estado == 'PENDIENTE' %}
-                        <div class="alert alert-warning mb-0">Tu solicitud está pendiente de aprobación. Podrás transferir y subir el comprobante después de que sea aceptada.</div>
+                        <div class="alert alert-warning mb-0">Tu solicitud está pendiente de aprobación. El hotel te indicará los siguientes pasos para el pago cuando la revise.</div>
                     {% elif reserva.estado == 'CONFIRMADA' and reserva.metodo_pago == 'TRANSFERENCIA' %}
                         <div class="border rounded-3 p-3 mb-3">
                             <h3 class="h6 fw-bold">Abono solicitado (30%): ${{ reserva.abono_requerido|floatformat:0 }} COP</h3>
@@ -84,6 +86,8 @@
                                 </form>
                             {% endif %}
                         {% endif %}
+                    {% elif reserva.estado == 'CONFIRMADA' and reserva.metodo_pago == 'TARJETA' %}
+                        <div class="alert alert-info mb-0">El pago con tarjeta en línea no está habilitado todavía. Comunícate con el hotel para coordinar el cobro. No se ha registrado ningún pago.</div>
                     {% endif %}
                 </div>
             </section>

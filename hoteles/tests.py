@@ -1,3 +1,4 @@
+from datetime import date, timedelta
 from django.test import TestCase
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -103,8 +104,8 @@ class TransferProofWorkflowTest(TestCase):
         self.reserva = Reserva.objects.create(
             huesped=huesped,
             habitacion=habitacion,
-            fecha_entrada='2026-12-01',
-            fecha_salida='2026-12-02',
+            fecha_entrada=date.today() + timedelta(days=2),
+            fecha_salida=date.today() + timedelta(days=3),
             estado='CONFIRMADA',
             metodo_pago='TRANSFERENCIA',
             monto_total=100000,
@@ -156,3 +157,25 @@ class TransferProofWorkflowTest(TestCase):
         response = self.client.get(f'/administracion/comprobantes/{comprobante.id}/')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, b'%PDF-1.4 prueba')
+
+    def test_card_method_is_saved_and_shown_in_reservation_history(self):
+        self.client.force_login(self.cliente)
+        response = self.client.post('/reservas/', {
+            'habitacion': self.reserva.habitacion_id,
+            'fecha_entrada': (date.today() + timedelta(days=5)).isoformat(),
+            'fecha_salida': (date.today() + timedelta(days=6)).isoformat(),
+            'cantidad_huespedes': 1,
+            'metodo_pago': 'TARJETA',
+        })
+
+        self.assertRedirects(response, '/mis-reservas/')
+        reserva_tarjeta = Reserva.objects.exclude(pk=self.reserva.pk).get()
+        self.assertEqual(reserva_tarjeta.metodo_pago, 'TARJETA')
+        self.assertFalse(Pago.objects.filter(reserva=reserva_tarjeta).exists())
+        response = self.client.get('/mis-reservas/')
+        self.assertContains(response, 'Tarjeta (coordinación con el hotel)')
+
+        reserva_tarjeta.estado = 'CONFIRMADA'
+        reserva_tarjeta.save(update_fields=['estado'])
+        response = self.client.get('/mis-reservas/')
+        self.assertContains(response, 'pago con tarjeta en línea no está habilitado')
